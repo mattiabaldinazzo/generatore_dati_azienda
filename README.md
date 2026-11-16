@@ -1,3 +1,5 @@
+Pagina pubblicata: https://mattiabaldinazzo.github.io/generatore_dati_azienda/
+
 # Generatore dati azienda
 
 Pagina che genera dati di fantasia per testare la maschera "Crea nuova azienda".
