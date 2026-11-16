@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generatore dati azienda - iliad Solution</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f5;
+    --surface:#ffffff;
+    --surface-2:#f6f8fa;
+    --ink:#171a20;
+    --muted:#5e6673;
+    --line:#dce1e8;
+    --line-soft:#e9edf2;
+    --red:#e2001a;
+    --red-soft:#fde8ea;
+    --ok:#0e7a4f;
+    --ok-soft:#e3f4ec;
+    --bad:#c4001a;
+    --chg:#a35f00;
+    --chg-soft:#fff2db;
+    --shadow:0 1px 2px rgba(23,26,32,.05), 0 8px 24px -12px rgba(23,26,32,.12);
+    --sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121419;
+      --surface:#1a1d24;
+      --surface-2:#22262e;
+      --ink:#e8ebf0;
+      --muted:#99a2af;
+      --line:#2d323c;
+      --line-soft:#262a33;
+      --red:#ff3b4e;
+      --red-soft:#3a1a1f;
+      --ok:#3ccb8a;
+      --ok-soft:#163027;
+      --bad:#ff6b7a;
+      --chg:#f0b14a;
+      --chg-soft:#3a2c12;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:96px}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:15px/1.5 var(--sans);
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"tnum" 1;
+  }
+  button{font:inherit; color:inherit}
+  :focus-visible{outline:2px solid var(--red); outline-offset:2px}
+
+  /* ---------------------------------------------------------------- header */
+  header{
+    position:sticky; top:0; z-index:30;
+    background:color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter:saturate(1.4) blur(14px);
+    -webkit-backdrop-filter:saturate(1.4) blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar{
+    max-width:1180px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px; margin-right:auto; min-width:0}
+  .logo{
+    width:34px; height:34px; border-radius:10px; background:var(--red); color:#fff;
+    display:grid; place-items:center; flex:none;
+  }
+  .logo svg{width:18px; height:18px}
+  h1{font-size:16px; font-weight:650; margin:0; letter-spacing:-.01em}
+  .sub{font-size:12.5px; color:var(--muted); margin-top:1px}
+
+  .toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+
+  .seg{
+    display:inline-flex; padding:3px; gap:2px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:11px;
+  }
+  .seg label{position:relative; cursor:pointer}
+  .seg input{position:absolute; opacity:0; pointer-events:none}
+  .seg span{
+    display:block; padding:6px 12px; border-radius:8px;
+    font-size:13px; font-weight:500; color:var(--muted); white-space:nowrap;
+    transition:background .15s, color .15s;
+  }
+  .seg label:hover span{color:var(--ink)}
+  .seg input:checked + span{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08), 0 0 0 1px var(--line)}
+  .seg input:focus-visible + span{outline:2px solid var(--red); outline-offset:1px}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    padding:8px 13px; border-radius:10px; font-size:13.5px; font-weight:500;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink);
+    transition:background .15s, border-color .15s;
+  }
+  .btn:hover{border-color:color-mix(in srgb, var(--ink) 25%, var(--line))}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:15px; height:15px; flex:none}
+  .btn-primary{background:var(--red); border-color:var(--red); color:#fff}
+  .btn-primary:hover{background:color-mix(in srgb, var(--red) 88%, #000); border-color:transparent}
+  .btn-group{display:inline-flex}
+  .btn-group .btn{border-radius:0}
+  .btn-group .btn:first-child{border-radius:10px 0 0 10px}
+  .btn-group .btn:last-child{border-radius:0 10px 10px 0; margin-left:-1px}
+
+  /* ---------------------------------------------------------------- layout */
+  .shell{
+    max-width:1180px; margin:0 auto; padding:28px 24px 80px;
+    display:grid; grid-template-columns:240px minmax(0,1fr); gap:32px; align-items:start;
+  }
+
+  /* rail: avanzamento lungo la maschera */
+  .rail{position:sticky; top:96px}
+  .rail-head{font-size:12.5px; color:var(--muted); margin:0 0 10px 12px}
+  .rail-total{
+    margin:0 0 14px 12px; height:4px; border-radius:4px; background:var(--line); overflow:hidden;
+  }
+  .rail-total i{display:block; height:100%; width:0; background:var(--red); transition:width .3s ease}
+  .rail ol{list-style:none; margin:0; padding:0; display:grid; gap:2px}
+  .rail a{
+    display:grid; grid-template-columns:22px 1fr auto; align-items:center; gap:10px;
+    padding:8px 12px; border-radius:10px; text-decoration:none; color:var(--muted);
+    font-size:13.5px; transition:background .15s, color .15s;
+  }
+  .rail a:hover{background:var(--surface); color:var(--ink)}
+  .rail a.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
+  .rail .n{
+    width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
+    font-size:11.5px; font-weight:600; border:1.5px solid var(--line); color:var(--muted);
+    transition:background .2s, border-color .2s, color .2s;
+  }
+  .rail a.active .n{border-color:var(--red); color:var(--red)}
+  .rail a.done .n{background:var(--ok); border-color:var(--ok); color:#fff}
+  .rail .c{font-size:12px; font-variant-numeric:tabular-nums}
+  .rail a.done .c{color:var(--ok)}
+  .rail-reset{
+    margin:14px 0 0 12px; padding:0; background:none; border:0; cursor:pointer;
+    font-size:12.5px; color:var(--muted); text-decoration:underline; text-underline-offset:3px;
+  }
+  .rail-reset:hover{color:var(--ink)}
+
+  /* ---------------------------------------------------------------- intro */
+  .intro{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    margin-bottom:20px; font-size:13.5px; color:var(--muted);
+  }
+  .intro summary{
+    list-style:none; cursor:pointer; padding:13px 18px; color:var(--ink); font-weight:500;
+    display:flex; align-items:center; gap:10px;
+  }
+  .intro summary::-webkit-details-marker{display:none}
+  .intro summary svg{width:16px; height:16px; color:var(--muted); transition:transform .2s}
+  .intro[open] summary svg{transform:rotate(90deg)}
+  .intro .body{padding:0 18px 16px 44px; max-width:76ch}
+  .intro ul{margin:0; padding-left:16px}
+  .intro li{margin:5px 0}
+  .intro b{color:var(--ink); font-weight:600}
+  .intro code{font-family:var(--mono); font-size:12.5px; background:var(--surface-2); padding:1px 5px; border-radius:5px}
+
+  /* ---------------------------------------------------------------- sezioni */
+  section{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    margin-bottom:16px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .sect-head{
+    display:flex; align-items:baseline; gap:12px;
+    padding:18px 20px 12px;
+  }
+  .sect-head .idx{font-size:13px; font-weight:600; color:var(--red); font-variant-numeric:tabular-nums}
+  .sect-head h2{font-size:17px; font-weight:650; margin:0; letter-spacing:-.015em}
+  .sect-head .count{margin-left:auto; font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .sect-head .count.done{color:var(--ok)}
+
+  .rows{padding:0 8px 8px}
+  .row{
+    display:grid; grid-template-columns:220px minmax(0,1fr) auto;
+    align-items:center; gap:14px; padding:8px 12px; border-radius:11px;
+    transition:background .15s;
+  }
+  .row:hover{background:var(--surface-2)}
+
+  .lbl{display:flex; align-items:flex-start; gap:10px; min-width:0}
+  .tick{
+    width:16px; height:16px; margin-top:2px; border-radius:50%; flex:none;
+    border:1.5px solid var(--line); display:grid; place-items:center;
+    transition:background .2s, border-color .2s;
+  }
+  .tick svg{width:10px; height:10px; color:#fff; opacity:0; transition:opacity .2s}
+  .row.is-copied .tick{background:var(--ok); border-color:var(--ok)}
+  .row.is-copied .tick svg{opacity:1}
+  .lbl-t{font-size:13.5px; font-weight:500; color:var(--ink); line-height:1.35}
+  .hint{display:block; font-size:12px; color:var(--muted); font-weight:400; margin-top:1px}
+  .status{
+    display:inline-flex; align-items:center; gap:4px; margin-top:4px;
+    font-size:11.5px; font-weight:500; color:var(--ok);
+    background:var(--ok-soft); padding:1px 7px 1px 5px; border-radius:20px;
+  }
+  .status svg{width:11px; height:11px}
+  .status.bad{color:var(--bad); background:var(--red-soft)}
+
+  .val{
+    font-family:var(--mono); font-size:14px; line-height:1.4; word-break:break-all;
+    padding:9px 12px; border-radius:9px; cursor:copy;
+    background:var(--surface-2); border:1px solid var(--line-soft);
+    transition:background .4s, border-color .4s;
+  }
+  .row:hover .val{background:var(--surface); border-color:var(--line)}
+  .val.flash{background:var(--ok-soft) !important; border-color:var(--ok) !important}
+  .val.changed{background:var(--chg-soft) !important; border-color:var(--chg) !important}
+
+  .actions{display:flex; align-items:center; gap:6px}
+  .copy{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-width:92px; padding:8px 12px; border-radius:9px; cursor:pointer;
+    font-size:13px; font-weight:500; white-space:nowrap;
+    background:transparent; border:1px solid var(--line); color:var(--ink);
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .copy svg{width:14px; height:14px; flex:none}
+  .copy:hover{background:var(--surface); border-color:color-mix(in srgb, var(--ink) 25%, var(--line))}
+  .copy.done{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+
+  .regen{
+    width:36px; height:36px; padding:0; flex:none; border-radius:9px; cursor:pointer;
+    display:grid; place-items:center;
+    background:transparent; border:1px solid var(--line); color:var(--muted);
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .regen svg{width:15px; height:15px}
+  .regen:hover{background:var(--surface); color:var(--ink); border-color:color-mix(in srgb, var(--ink) 25%, var(--line))}
+  .regen:disabled{opacity:.35; cursor:not-allowed}
+  .regen:disabled:hover{background:transparent; color:var(--muted); border-color:var(--line)}
+
+  /* documenti */
+  .docs{padding:0 8px 8px}
+  .doc{
+    display:grid; grid-template-columns:220px minmax(0,1fr) auto;
+    gap:14px; align-items:center; padding:8px 12px; border-radius:11px;
+  }
+  .doc:hover{background:var(--surface-2)}
+  .doc .lbl-t{display:flex; align-items:center; gap:10px}
+  .doc .lbl-t svg{width:16px; height:16px; color:var(--muted); flex:none}
+  .doc .file{font-family:var(--mono); font-size:12.5px; color:var(--muted); word-break:break-all}
+
+  /* ---------------------------------------------------------------- footer */
+  footer{
+    max-width:1180px; margin:0 auto; padding:0 24px 60px;
+    font-size:12.5px; color:var(--muted);
+  }
+  footer .inner{margin-left:272px; max-width:76ch; border-top:1px solid var(--line); padding-top:18px}
+  footer h3{font-size:13px; font-weight:600; color:var(--ink); margin:0 0 6px}
+  footer ul{margin:0; padding-left:16px}
+  footer li{margin:4px 0}
+
+  /* ---------------------------------------------------------------- toast */
+  .toast{
+    position:fixed; left:50%; bottom:28px; transform:translate(-50%,16px);
+    display:flex; align-items:center; gap:8px;
+    background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:12px;
+    font-size:13px; font-weight:500; opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; z-index:50; max-width:calc(100vw - 32px);
+    box-shadow:0 12px 32px -8px rgba(0,0,0,.35);
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+
+  /* ---------------------------------------------------------------- responsive */
+  @media (max-width:960px){
+    .shell{grid-template-columns:minmax(0,1fr); gap:16px; padding-top:16px}
+    .rail,main{min-width:0}
+    .rail{position:sticky; top:var(--hdr, 120px); z-index:20; margin:0 -24px; padding:10px 24px;
+      background:color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line)}
+    .rail-head,.rail-total,.rail-reset{display:none}
+    .rail ol{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none}
+    .rail ol::-webkit-scrollbar{display:none}
+    .rail a{grid-template-columns:auto auto; padding:6px 10px; background:var(--surface); border:1px solid var(--line); white-space:nowrap}
+    .rail a .c{display:none}
+    footer .inner{margin-left:0}
+  }
+  @media (max-width:720px){
+    header{position:static}
+    .rail{top:0 !important}
+    .bar{padding:12px 16px; gap:12px}
+    .toolbar{width:100%}
+    .shell{padding:12px 16px 60px}
+    .rail{margin:0 -16px; padding:10px 16px}
+    footer{padding:0 16px 48px}
+    .row,.doc{grid-template-columns:minmax(0,1fr) auto; gap:8px 10px}
+    .row .lbl,.doc .lbl-t{grid-column:1 / -1}
+    .row .val{grid-column:1}
+    .copy{min-width:0}
+    .copy .copy-t{display:none}
+    .sect-head{padding:16px 16px 10px}
+    .rows,.docs{padding:0 4px 6px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important}
+  }
+  @media print{
+    header{position:static} .toolbar,.actions,.copy,.rail,.intro{display:none}
+    .shell{display:block}
+    body{background:#fff} section{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01"/></svg>
+      </div>
+      <div style="min-width:0">
+        <h1>Generatore dati azienda</h1>
+        <div class="sub" id="stamp">Caricamento</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="seg" id="tipoSel" role="radiogroup" aria-label="Tipo soggetto">
+        <label><input type="radio" name="tipo" value="" checked><span>Casuale</span></label>
+        <label><input type="radio" name="tipo" value="Persona giuridica"><span>Persona giuridica</span></label>
+        <label><input type="radio" name="tipo" value="Persona fisica"><span>Persona fisica</span></label>
+      </div>
+      <div class="btn-group">
+        <button id="btnCopiaTsv" class="btn" title="Copia tutti i campi come tabella da incollare in Excel">Copia tutto (Excel)</button>
+        <button id="btnCopiaTxt" class="btn" title="Copia tutti i campi come elenco Campo: valore">Copia tutto (testo)</button>
+      </div>
+      <button id="btnRegen" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"/><path d="M3 21v-5h5"/></svg>
+        Rigenera tutto
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="nav" aria-label="Sezioni della maschera">
+    <p class="rail-head" id="railHead">Campi copiati</p>
+    <div class="rail-total"><i id="railBar"></i></div>
+    <ol id="railList"></ol>
+    <button class="rail-reset" id="btnReset" type="button">Azzera spunte</button>
+  </nav>
+
+  <main>
+    <details class="intro" id="intro">
+      <summary>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        Come si usa
+      </summary>
+      <div class="body">
+        <ul>
+          <li>I campi seguono l'ordine della maschera <b>Crea nuova azienda</b> di iliad Solution. Premi <b>Copia</b> o clicca sul valore: il campo si spunta e a sinistra vedi quanti ne mancano.</li>
+          <li>Il pulsante con le due frecce rigenera solo quel campo. Se altri campi dipendono da lui, si aggiornano insieme e si evidenziano in giallo: per esempio il codice fiscale segue nome, data e comune di nascita, l'IBAN e il BIC seguono la banca.</li>
+          <li>I valori derivati sono coerenti: titolare del conto uguale al rappresentante legale. Con <b>Persona fisica</b> il codice fiscale è quello della persona, con <b>Persona giuridica</b> coincide con la P.IVA.</li>
+          <li>P.IVA, codice fiscale e IBAN rispettano i caratteri di controllo: la maschera non li rifiuta.</li>
+          <li>Le tendine usano le voci reali della maschera. Se iliad ne aggiunge, si aggiornano in un solo punto: l'oggetto <code>CFG</code> in cima allo script.</li>
+        </ul>
+      </div>
+    </details>
+
+    <div id="app"></div>
+  </main>
+</div>
+
+<footer>
+  <div class="inner">
+    <h3>Note</h3>
+    <ul>
+      <li>Dati inventati e generati nel browser: nessuna connessione, nessun salvataggio su server. Non corrispondono a persone, aziende o conti reali.</li>
+      <li>Codici ABI e BIC appartengono a banche italiane reali (BIC della capogruppo): servono solo a rendere il test plausibile.</li>
+      <li>Da usare su ambienti o record di test. Le aziende create in produzione restano nel database.</li>
+    </ul>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================================
+   1. CONFIGURAZIONE - e' l'unica parte da toccare quando cambiano le tendine
+   ========================================================================= */
+
+const CFG = {
+  // Voci del menu "Tipo ragione sociale"
+  tipiRagioneSociale: ["Persona giuridica", "Persona fisica"],
+  // Menu "Genere"
+  generi: ["M", "F"],
+  // Menu "Aliquota IRPEF"
+  aliquoteIrpef: ["23%", "20%", "0%"],
+  // Menu "Base imponibile"
+  basiImponibili: ["50%", "20% - se si avvale di dipendenti", "0%", "100%"],
+  // Menu "Causale pagamento"
+  causaliPagamento: ["S", "T", "U", "ZO", "A"],
+  // Menu "Regime fiscale"
+  regimiFiscali: ["RF01", "RF19"]
+};
+
+/* Banche italiane reali: ABI, denominazione, BIC della capogruppo */
+const BANCHE = [
+  { abi:"02008", nome:"UNICREDIT S.P.A.",                          bic:"UNCRITMMXXX" },
+  { abi:"03069", nome:"INTESA SANPAOLO S.P.A.",                    bic:"BCITITMMXXX" },
+  { abi:"01005", nome:"BANCA NAZIONALE DEL LAVORO S.P.A.",         bic:"BNLIITRRXXX" },
+  { abi:"01030", nome:"BANCA MONTE DEI PASCHI DI SIENA S.P.A.",    bic:"PASCITMMXXX" },
+  { abi:"07601", nome:"POSTE ITALIANE S.P.A. - BANCOPOSTA",        bic:"BPPIITRRXXX" },
+  { abi:"05034", nome:"BANCO BPM S.P.A.",                          bic:"BAPPIT21XXX" },
+  { abi:"05387", nome:"BPER BANCA S.P.A.",                         bic:"BPMOIT22XXX" },
+  { abi:"03268", nome:"BANCA SELLA S.P.A.",                        bic:"SELBIT2BXXX" },
+  { abi:"03062", nome:"BANCA MEDIOLANUM S.P.A.",                   bic:"MEDBITMMXXX" }
+];
+
+/* Comuni: nome, sigla provincia, CAP del centro, codice catastale (Belfiore), prefisso telefonico */
+const COMUNI = [
+  { nome:"Roma",            pr:"RM", cap:"00100", bf:"H501", tel:"06"   },
+  { nome:"Milano",          pr:"MI", cap:"20121", bf:"F205", tel:"02"   },
+  { nome:"Napoli",          pr:"NA", cap:"80121", bf:"F839", tel:"081"  },
+  { nome:"Torino",          pr:"TO", cap:"10121", bf:"L219", tel:"011"  },
+  { nome:"Palermo",         pr:"PA", cap:"90133", bf:"G273", tel:"091"  },
+  { nome:"Genova",          pr:"GE", cap:"16121", bf:"D969", tel:"010"  },
+  { nome:"Bologna",         pr:"BO", cap:"40121", bf:"A944", tel:"051"  },
+  { nome:"Firenze",         pr:"FI", cap:"50122", bf:"D612", tel:"055"  },
+  { nome:"Bari",            pr:"BA", cap:"70121", bf:"A662", tel:"080"  },
+  { nome:"Catania",         pr:"CT", cap:"95124", bf:"C351", tel:"095"  },
+  { nome:"Venezia",         pr:"VE", cap:"30122", bf:"L736", tel:"041"  },
+  { nome:"Verona",          pr:"VR", cap:"37121", bf:"L781", tel:"045"  },
+  { nome:"Messina",         pr:"ME", cap:"98121", bf:"F158", tel:"090"  },
+  { nome:"Padova",          pr:"PD", cap:"35121", bf:"G224", tel:"049"  },
+  { nome:"Trieste",         pr:"TS", cap:"34121", bf:"L424", tel:"040"  },
+  { nome:"Brescia",         pr:"BS", cap:"25121", bf:"B157", tel:"030"  },
+  { nome:"Parma",           pr:"PR", cap:"43121", bf:"G337", tel:"0521" },
+  { nome:"Taranto",         pr:"TA", cap:"74121", bf:"E986", tel:"099"  },
+  { nome:"Prato",           pr:"PO", cap:"59100", bf:"G999", tel:"0574" },
+  { nome:"Modena",          pr:"MO", cap:"41121", bf:"F257", tel:"059"  },
+  { nome:"Reggio Calabria", pr:"RC", cap:"89121", bf:"H224", tel:"0965" },
+  { nome:"Reggio Emilia",   pr:"RE", cap:"42121", bf:"H223", tel:"0522" },
+  { nome:"Perugia",         pr:"PG", cap:"06121", bf:"G478", tel:"075"  },
+  { nome:"Ravenna",         pr:"RA", cap:"48121", bf:"H199", tel:"0544" },
+  { nome:"Livorno",         pr:"LI", cap:"57121", bf:"E625", tel:"0586" },
+  { nome:"Cagliari",        pr:"CA", cap:"09124", bf:"B354", tel:"070"  },
+  { nome:"Foggia",          pr:"FG", cap:"71121", bf:"D643", tel:"0881" },
+  { nome:"Rimini",          pr:"RN", cap:"47921", bf:"H294", tel:"0541" },
+  { nome:"Salerno",         pr:"SA", cap:"84121", bf:"H703", tel:"089"  },
+  { nome:"Ferrara",         pr:"FE", cap:"44121", bf:"D548", tel:"0532" },
+  { nome:"Sassari",         pr:"SS", cap:"07100", bf:"L332", tel:"079"  },
+  { nome:"Latina",          pr:"LT", cap:"04100", bf:"E472", tel:"0773" },
+  { nome:"Monza",           pr:"MB", cap:"20900", bf:"F704", tel:"039"  },
+  { nome:"Siracusa",        pr:"SR", cap:"96100", bf:"L444", tel:"0931" },
+  { nome:"Pescara",         pr:"PE", cap:"65121", bf:"G482", tel:"085"  },
+  { nome:"Bergamo",         pr:"BG", cap:"24121", bf:"A794", tel:"035"  },
+  { nome:"Forlì",           pr:"FC", cap:"47121", bf:"D704", tel:"0543" },
+  { nome:"Trento",          pr:"TN", cap:"38122", bf:"L378", tel:"0461" },
+  { nome:"Vicenza",         pr:"VI", cap:"36100", bf:"L840", tel:"0444" },
+  { nome:"Bolzano",         pr:"BZ", cap:"39100", bf:"A952", tel:"0471" }
+];
+
+const NOMI = ["Marco","Luca","Andrea","Davide","Simone","Matteo","Alessandro","Federico","Giuseppe","Antonio",
+              "Salvatore","Francesco","Chiara","Giulia","Elena","Martina","Sara","Valentina","Francesca","Ilaria"];
+const COGNOMI = ["Rossi","Bianchi","Ferrari","Esposito","Romano","Colombo","Ricci","Marino","Greco","Bruno",
+                 "Gallo","Conti","De Luca","Costa","Giordano","Mancini","Rizzo","Lombardi","Moretti","Barbieri"];
+const BRAND = ["DELTA","NOVA","VEGA","ORION","PRIMA","LINEA","PUNTO","CENTRO","FUTURA","NEXT","PRIME","ALFA",
+               "ADRIATICA","TIRRENA","PADANA","SICILIA","SUD","NORD EST","EURO","ITALIA","DIGITAL","SMART"];
+const SETTORI = ["TELECOMUNICAZIONI","IMPIANTI","SERVIZI","ENERGIA","DIGITALE","STORE","TECH","MOBILE",
+                 "ELETTRONICA","LOGISTICA","COMMERCIO","CONSULENZA"];
+const VIE = ["Via Roma","Via Garibaldi","Via Mazzini","Via Dante","Corso Italia","Viale Europa",
+             "Via Marconi","Via Verdi","Piazza della Repubblica","Via Torino"];
+const DOMINI_PEC = ["pec.it", "legalmail.it", "postecert.it", "arubapec.it", "pecimprese.it"];
+const DOMINI_EMAIL = ["gmail.com", "libero.it", "outlook.it", "tiscali.it", "virgilio.it"];
+const PREFISSI_MOBILE = ["320","327","328","329","333","334","335","336","337","338","339","340","346","347","348","349","350","351","366","380","388","392","393"];
+
+/* =========================================================================
+   2. UTILITA' CASUALI
+   ========================================================================= */
+
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const digits = n => Array.from({ length: n }, () => rnd(10)).join("");
+const pad2 = n => String(n).padStart(2, "0");
+const stripAccents = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+const slug = s => stripAccents(s).toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.|\.$/g, "");
+// Sceglie un valore diverso da quello attuale, se la lista lo permette
+const pickDiverso = (arr, attuale) => {
+  const altri = arr.filter(x => x !== attuale);
+  return altri.length ? pick(altri) : attuale;
+};
+
+/* =========================================================================
+   3. PARTITA IVA - 10 cifre + cifra di controllo
+   (raddoppio delle posizioni pari, -9 se > 9)
+   ========================================================================= */
+
+function pivaCheckDigit(d10){
+  let total = 0;
+  for (let i = 0; i < d10.length; i++){
+    let d = Number(d10[i]);
+    if (i % 2 === 1){ d *= 2; if (d > 9) d -= 9; }
+    total += d;
+  }
+  return (10 - (total % 10)) % 10;
+}
+function genPiva(){
+  const base = digits(10);
+  return base + pivaCheckDigit(base);
+}
+function pivaValida(p){
+  return /^\d{11}$/.test(p) && pivaCheckDigit(p.slice(0, 10)) === Number(p[10]);
+}
+
+/* =========================================================================
+   4. IBAN ITALIANO - IT + check + CIN + ABI + CAB + conto (27 caratteri)
+   CIN e check digit calcolati secondo le tabelle ufficiali
+   ========================================================================= */
+
+const T_ODD = {
+  "0":1,"1":0,"2":5,"3":7,"4":9,"5":13,"6":15,"7":17,"8":19,"9":21,
+  "A":1,"B":0,"C":5,"D":7,"E":9,"F":13,"G":15,"H":17,"I":19,"J":21,
+  "K":2,"L":4,"M":18,"N":20,"O":11,"P":3,"Q":6,"R":8,"S":12,"T":14,
+  "U":16,"V":10,"W":22,"X":25,"Y":24,"Z":23
+};
+const T_EVEN = (() => {
+  const t = {};
+  for (let d = 0; d < 10; d++) t[String(d)] = d;
+  for (let i = 0; i < 26; i++) t[String.fromCharCode(65 + i)] = i;
+  return t;
+})();
+
+function cinCalcola(s22){
+  let tot = 0;
+  for (let i = 0; i < s22.length; i++){
+    const ch = s22[i].toUpperCase();
+    tot += (i % 2 === 0) ? T_ODD[ch] : T_EVEN[ch];
+  }
+  return String.fromCharCode(65 + (tot % 26));
+}
+
+function ibanCheckDigits(bban){
+  const numeric = (bban + "IT00").split("").map(c => /[0-9]/.test(c) ? c : String(parseInt(c, 36))).join("");
+  let rest = 0;
+  for (const d of numeric) rest = (rest * 10 + Number(d)) % 97;
+  return String(98 - rest).padStart(2, "0");
+}
+
+function genIban(banca){
+  const cab = digits(5);
+  const conto = digits(12);
+  const cin = cinCalcola(banca.abi + cab + conto);
+  const bban = cin + banca.abi + cab + conto;
+  return "IT" + ibanCheckDigits(bban) + bban;
+}
+function ibanValido(iban){
+  const s = iban.replace(/\s/g, "").toUpperCase();
+  const numeric = (s.slice(4) + s.slice(0, 4)).split("")
+    .map(c => /[0-9]/.test(c) ? c : String(parseInt(c, 36))).join("");
+  let rest = 0;
+  for (const d of numeric) rest = (rest * 10 + Number(d)) % 97;
+  return rest === 1;
+}
+
+/* =========================================================================
+   5. CODICE FISCALE - 16 caratteri, persona fisica
+   ========================================================================= */
+
+function consona(s){ return s.split("").filter(c => /[BCDFGHJKLMNPQRSTVWXYZ]/.test(c)); }
+function vocale(s){ return s.split("").filter(c => /[AEIOU]/.test(c)); }
+const MESI = "ABCDEHLMPRST"; // A=gen ... T=dic (H=giugno, L=luglio, M=agosto, P=settembre, R=ottobre, S=novembre, T=dicembre)
+const eDonna = g => /donna|femmin|^f$/i.test(String(g || "").trim());
+
+function treCognome(cogn){
+  const c = consona(cogn), v = vocale(cogn);
+  const s = (c.concat(v)).join("");
+  return (s + "XXX").slice(0, 3);
+}
+function treNome(nome){
+  const c = consona(nome), v = vocale(nome);
+  const s = c.length >= 4 ? (c[0] + c[2] + c[3]) : (c.concat(v)).join("");
+  return (s + "XXX").slice(0, 3);
+}
+function cfCheckChar(base15){
+  let tot = 0;
+  for (let i = 0; i < base15.length; i++){
+    const ch = base15[i];
+    tot += (i % 2 === 0) ? T_ODD[ch] : T_EVEN[ch];
+  }
+  return String.fromCharCode(65 + (tot % 26));
+}
+function genCodiceFiscale({ cognome, nome, genere, dataISO, belfiore }){
+  const c = treCognome(stripAccents(cognome).toUpperCase().replace(/[^A-Z]/g, ""));
+  const n = treNome(stripAccents(nome).toUpperCase().replace(/[^A-Z]/g, ""));
+  const [y, m, d] = dataISO.split("-");
+  const anno = y.slice(2);
+  const mese = MESI[Number(m) - 1];
+  const giorno = String(Number(d) + (eDonna(genere) ? 40 : 0)).padStart(2, "0");
+  const base = c + n + anno + mese + giorno + belfiore;
+  return base + cfCheckChar(base);
+}
+function cfValido(cf){
+  if (!/^[A-Z0-9]{16}$/.test(cf)) return null;
+  return cfCheckChar(cf.slice(0, 15)) === cf[15];
+}
+
+/* =========================================================================
+   6. GENERAZIONE DEL RECORD
+   ========================================================================= */
+
+function genDataISO(){
+  const anno = 1965 + rnd(31);
+  const mese = 1 + rnd(12);
+  const giorno = 1 + rnd(28);
+  return `${anno}-${pad2(mese)}-${pad2(giorno)}`;
+}
+
+function genPersona(){
+  const genere = pick(CFG.generi);
+  const nome = pick(NOMI);
+  const cognome = pick(COGNOMI);
+  const comuneNascita = pick(COMUNI);
+  const dataISO = genDataISO();
+  return { nome, cognome, genere, dataISO, comuneNascita };
+}
+
+const FORME_GIURIDICHE = ["S.R.L.", "S.R.L.S.", "S.P.A.", "S.N.C.", "S.A.S."];
+
+// Tipo soggetto forzato dal selettore in testa: null = casuale
+let forzaTipo = null;
+
+function genRagioneGiuridica(){
+  return `${pick(BRAND)} ${pick(SETTORI)} ${pick(FORME_GIURIDICHE)}`.replace(/\s+/g, " ").trim();
+}
+function ragioneFisica(nome, cognome, cognomePrima){
+  const n = nome.toUpperCase(), c = cognome.toUpperCase();
+  return (cognomePrima ? `${c} ${n}` : `${n} ${c}`).replace(/\s+/g, " ").trim();
+}
+function pecDa(ragione, dominio){
+  const base = slug(ragione).split(".").slice(0, 2).join("") || "azienda";
+  return `${base}@${dominio}`;
+}
+function emailDa(nome, cognome, dominio){
+  const base = slug(`${cognome}${nome}`) || "contatto";
+  return `${base}@${dominio}`;
+}
+
+function genAzienda(persona){
+  const tipo = forzaTipo || pick(CFG.tipiRagioneSociale);
+  const giuridica = tipo === "Persona giuridica";
+
+  // Persona fisica: la ragione sociale e' il nome della persona
+  const ragione = giuridica
+    ? genRagioneGiuridica()
+    : ragioneFisica(persona.nome, persona.cognome, Math.random() < 0.5);
+
+  const piva = genPiva();
+  // Persona giuridica: il CF coincide con la P.IVA (11 cifre)
+  // Persona fisica: CF a 16 caratteri, coerente con l'anagrafica del rappresentante
+  const cf = giuridica
+    ? piva
+    : genCodiceFiscale({
+        cognome: persona.cognome, nome: persona.nome, genere: persona.genere,
+        dataISO: persona.dataISO, belfiore: persona.comuneNascita.bf
+      });
+
+  const sdi = genSdi();
+  const pec = pecDa(ragione, pick(DOMINI_PEC));
+
+  return { tipo, ragione, piva, cf, sdi, pec };
+}
+
+function genSdi(){
+  const pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from({ length: 7 }, () => pool[rnd(pool.length)]).join("");
+}
+
+function genContatti(persona, comuneSede){
+  const email = emailDa(persona.nome, persona.cognome, pick(DOMINI_EMAIL));
+  const telefono = pick(PREFISSI_MOBILE) + digits(7);
+  const fax = comuneSede.tel + digits(7);
+  return { email, telefono, fax };
+}
+
+function genPagamento(banca, persona){
+  return {
+    titolare: `${persona.nome} ${persona.cognome}`,
+    banca: banca.nome,
+    abi: banca.abi,
+    iban: genIban(banca),
+    bic: banca.bic
+  };
+}
+
+function genIndirizzo(comune){
+  return {
+    provincia: comune.pr,
+    citta: comune.nome,
+    cap: comune.cap,
+    indirizzo: `${pick(VIE)} ${1 + rnd(180)}`
+  };
+}
+
+function generaTutto(){
+  const persona = genPersona();
+  const az = genAzienda(persona);
+  const comuneSede = pick(COMUNI);
+  const contatti = genContatti(persona, comuneSede);
+  const banca = pick(BANCHE);
+  const pagamento = genPagamento(banca, persona);
+  const agente = { nome: pick(NOMI), cognome: pick(COGNOMI) };
+  const sede = genIndirizzo(comuneSede);
+  const [y, m, d] = persona.dataISO.split("-");
+
+  return {
+    _v: 2,
+    generato: new Date().toISOString(),
+    // 1. Dati azienda
+    tipoRagioneSociale: az.tipo,
+    ragioneSociale: az.ragione,
+    piva: az.piva,
+    codiceFiscale: az.cf,
+    codiceSdi: az.sdi,
+    pec: az.pec,
+    // 2. Dati rappresentante legale
+    genere: persona.genere,
+    nomeRappresentante: persona.nome,
+    cognomeRappresentante: persona.cognome,
+    dataNascita: `${d}/${m}/${y}`,
+    provinciaNascita: persona.comuneNascita.pr,
+    cittaNascita: persona.comuneNascita.nome,
+    email: contatti.email,
+    telefono: contatti.telefono,
+    fax: contatti.fax,
+    // 3. Dati di fatturazione
+    aliquotaIrpef: pick(CFG.aliquoteIrpef),
+    baseImponibile: pick(CFG.basiImponibili),
+    causalePagamento: pick(CFG.causaliPagamento),
+    regimeFiscale: pick(CFG.regimiFiscali),
+    // 4. Agente di riferimento
+    nomeAgente: agente.nome,
+    cognomeAgente: agente.cognome,
+    // 5. Informazioni di pagamento
+    titolareConto: pagamento.titolare,
+    nomeBanca: pagamento.banca,
+    iban: pagamento.iban,
+    bic: pagamento.bic,
+    // 6. Compensazione
+    compensazione: pick(["Sì", "No"]),
+    // 7. Indirizzo di fatturazione
+    provincia: sede.provincia,
+    citta: sede.citta,
+    cap: sede.cap,
+    indirizzo: sede.indirizzo,
+    // extra non mostrati
+    _abi: pagamento.abi,
+    _fileBase: slug(az.ragione) || "azienda"
+  };
+}
+
+/* =========================================================================
+   6b. RIGENERAZIONE DEL SINGOLO CAMPO
+   Ogni funzione modifica una copia del record; poi allinea() ricalcola i
+   campi derivati, cosi' il record resta coerente.
+   ========================================================================= */
+
+const comuneDa = nome => COMUNI.find(c => c.nome === nome) || COMUNI[0];
+const bancaDa = nome => BANCHE.find(b => b.nome === nome) || BANCHE[0];
+const dominioDi = indirizzo => String(indirizzo).split("@")[1] || "";
+const isoDaData = ddmmyyyy => { const [d, m, y] = ddmmyyyy.split("/"); return `${y}-${m}-${d}`; };
+const dataDaIso = iso => { const [y, m, d] = iso.split("-"); return `${d}/${m}/${y}`; };
+
+function cfPersona(r){
+  return genCodiceFiscale({
+    cognome: r.cognomeRappresentante, nome: r.nomeRappresentante, genere: r.genere,
+    dataISO: isoDaData(r.dataNascita), belfiore: comuneDa(r.cittaNascita).bf
+  });
+}
+
+function allinea(n, vecchio){
+  const giuridica = n.tipoRagioneSociale === "Persona giuridica";
+
+  // Persona fisica: la ragione sociale segue il nome, mantenendo l'ordine scelto
+  if (!giuridica){
+    const cognomePrima = n.ragioneSociale ===
+      ragioneFisica(vecchio.nomeRappresentante, vecchio.cognomeRappresentante, true);
+    n.ragioneSociale = ragioneFisica(n.nomeRappresentante, n.cognomeRappresentante, cognomePrima);
+  }
+  n.codiceFiscale = giuridica ? n.piva : cfPersona(n);
+  n.pec = pecDa(n.ragioneSociale, dominioDi(n.pec) || pick(DOMINI_PEC));
+  n._fileBase = slug(n.ragioneSociale) || "azienda";
+
+  // Rappresentante: contatti e titolare del conto
+  n.email = emailDa(n.nomeRappresentante, n.cognomeRappresentante, dominioDi(n.email) || pick(DOMINI_EMAIL));
+  n.titolareConto = `${n.nomeRappresentante} ${n.cognomeRappresentante}`;
+  n.provinciaNascita = comuneDa(n.cittaNascita).pr;
+
+  // Banca: BIC e ABI seguono il nome; IBAN nuovo se cambia la banca
+  const banca = bancaDa(n.nomeBanca);
+  n.bic = banca.bic;
+  n._abi = banca.abi;
+  if (banca.abi !== vecchio._abi) n.iban = genIban(banca);
+
+  // Sede: provincia, CAP e prefisso del fax seguono la citta'
+  const sede = comuneDa(n.citta);
+  n.provincia = sede.pr;
+  n.cap = sede.cap;
+  if (n.citta !== vecchio.citta) n.fax = sede.tel + digits(7);
+  return n;
+}
+
+const RIGENERA = {
+  tipoRagioneSociale: n => {
+    n.tipoRagioneSociale = pickDiverso(CFG.tipiRagioneSociale, n.tipoRagioneSociale);
+    n.ragioneSociale = n.tipoRagioneSociale === "Persona giuridica"
+      ? genRagioneGiuridica()
+      : ragioneFisica(n.nomeRappresentante, n.cognomeRappresentante, Math.random() < 0.5);
+  },
+  ragioneSociale: n => {
+    if (n.tipoRagioneSociale === "Persona giuridica"){
+      let nuova = genRagioneGiuridica();
+      while (nuova === n.ragioneSociale) nuova = genRagioneGiuridica();
+      n.ragioneSociale = nuova;
+    } else {
+      // Persona fisica: si inverte l'ordine nome / cognome
+      const cognomePrima = n.ragioneSociale ===
+        ragioneFisica(n.nomeRappresentante, n.cognomeRappresentante, true);
+      n.ragioneSociale = ragioneFisica(n.nomeRappresentante, n.cognomeRappresentante, !cognomePrima);
+    }
+  },
+  piva: n => { n.piva = genPiva(); },
+  codiceFiscale: n => {
+    // Giuridica: CF = P.IVA, quindi nuova P.IVA. Fisica: nuova data di nascita
+    if (n.tipoRagioneSociale === "Persona giuridica") n.piva = genPiva();
+    else n.dataNascita = dataDaIso(genDataISO());
+  },
+  codiceSdi: n => { n.codiceSdi = genSdi(); },
+  pec: n => { n.pec = pecDa(n.ragioneSociale, pickDiverso(DOMINI_PEC, dominioDi(n.pec))); },
+  genere: n => { n.genere = pickDiverso(CFG.generi, n.genere); },
+  nomeRappresentante: n => { n.nomeRappresentante = pickDiverso(NOMI, n.nomeRappresentante); },
+  cognomeRappresentante: n => { n.cognomeRappresentante = pickDiverso(COGNOMI, n.cognomeRappresentante); },
+  dataNascita: n => { n.dataNascita = dataDaIso(genDataISO()); },
+  provinciaNascita: n => { n.cittaNascita = pickDiverso(COMUNI.map(c => c.nome), n.cittaNascita); },
+  cittaNascita: n => { n.cittaNascita = pickDiverso(COMUNI.map(c => c.nome), n.cittaNascita); },
+  email: n => { n.email = emailDa(n.nomeRappresentante, n.cognomeRappresentante, pickDiverso(DOMINI_EMAIL, dominioDi(n.email))); },
+  telefono: n => { n.telefono = pick(PREFISSI_MOBILE) + digits(7); },
+  fax: n => { n.fax = comuneDa(n.citta).tel + digits(7); },
+  aliquotaIrpef: n => { n.aliquotaIrpef = pickDiverso(CFG.aliquoteIrpef, n.aliquotaIrpef); },
+  baseImponibile: n => { n.baseImponibile = pickDiverso(CFG.basiImponibili, n.baseImponibile); },
+  causalePagamento: n => { n.causalePagamento = pickDiverso(CFG.causaliPagamento, n.causalePagamento); },
+  regimeFiscale: n => { n.regimeFiscale = pickDiverso(CFG.regimiFiscali, n.regimeFiscale); },
+  nomeAgente: n => { n.nomeAgente = pickDiverso(NOMI, n.nomeAgente); },
+  cognomeAgente: n => { n.cognomeAgente = pickDiverso(COGNOMI, n.cognomeAgente); },
+  nomeBanca: n => { n.nomeBanca = pickDiverso(BANCHE.map(b => b.nome), n.nomeBanca); },
+  iban: n => { n.iban = genIban(bancaDa(n.nomeBanca)); },
+  bic: n => { n.nomeBanca = pickDiverso(BANCHE.map(b => b.nome), n.nomeBanca); },
+  compensazione: n => { n.compensazione = n.compensazione === "Sì" ? "No" : "Sì"; },
+  provincia: n => { n.citta = pickDiverso(COMUNI.map(c => c.nome), n.citta); },
+  citta: n => { n.citta = pickDiverso(COMUNI.map(c => c.nome), n.citta); },
+  cap: n => { n.citta = pickDiverso(COMUNI.map(c => c.nome), n.citta); },
+  indirizzo: n => {
+    let nuovo = `${pick(VIE)} ${1 + rnd(180)}`;
+    while (nuovo === n.indirizzo) nuovo = `${pick(VIE)} ${1 + rnd(180)}`;
+    n.indirizzo = nuovo;
+  }
+};
+
+// Campi che non si rigenerano da soli: il motivo appare al passaggio del mouse
+const NON_RIGENERABILI = {
+  titolareConto: "Segue il rappresentante legale: rigenera nome o cognome"
+};
+
+function rigeneraCampo(key){
+  const fn = RIGENERA[key];
+  if (!fn) return;
+  const vecchio = record;
+  const nuovo = Object.assign({}, record);
+  fn(nuovo);
+  allinea(nuovo, vecchio);
+
+  // Il selettore in alto segue il tipo, se era fissato
+  if (key === "tipoRagioneSociale" && forzaTipo){
+    forzaTipo = nuovo.tipoRagioneSociale;
+    const radio = document.querySelector('#tipoSel input[value="' + forzaTipo + '"]');
+    if (radio) radio.checked = true;
+  }
+
+  const cambiati = [];
+  SEZIONI.forEach(sez => sez.campi.forEach(c => {
+    if (nuovo[c.k] !== vecchio[c.k]) cambiati.push(c);
+  }));
+  cambiati.forEach(c => copiati.delete(c.k));
+
+  record = nuovo;
+  salva();
+  render();
+
+  cambiati.forEach(c => {
+    const v = document.querySelector('.val[data-key="' + c.k + '"]');
+    if (!v) return;
+    v.classList.add("changed");
+    setTimeout(() => v.classList.remove("changed"), 1400);
+  });
+  const btn = document.querySelector('.regen[data-key="' + key + '"]');
+  if (btn) btn.focus({ preventScroll: true });
+
+  const principale = cambiati.find(c => c.k === key) || cambiati[0];
+  const altri = cambiati.filter(c => c !== principale).map(c => c.label);
+  if (!principale) toast("Nessun valore diverso disponibile");
+  else toast("Rigenerato: " + principale.label + (altri.length ? ", aggiornati anche " + altri.join(", ") : ""));
+}
+
+/* =========================================================================
+   7. DEFINIZIONE DEI CAMPI (ordine identico alla maschera)
+   ========================================================================= */
+
+const SEZIONI = [
+  {
+    id: "azienda",
+    titolo: "Dati azienda",
+    campi: [
+      { k: "tipoRagioneSociale", label: "Tipo ragione sociale", nota: "menu a tendina" },
+      { k: "ragioneSociale",     label: "Ragione sociale" },
+      { k: "piva",               label: "P.IVA", check: "piva" },
+      { k: "codiceFiscale",      label: "Codice fiscale", check: "cf" },
+      { k: "codiceSdi",          label: "Codice SDI" },
+      { k: "pec",                label: "Pec" }
+    ]
+  },
+  {
+    id: "rappresentante",
+    titolo: "Dati rappresentante legale",
+    campi: [
+      { k: "genere",                 label: "Genere", nota: "menu a tendina" },
+      { k: "nomeRappresentante",     label: "Nome rappresentante" },
+      { k: "cognomeRappresentante",  label: "Cognome rappresentante" },
+      { k: "dataNascita",            label: "Data di nascita", nota: "gg/mm/aaaa" },
+      { k: "provinciaNascita",       label: "Provincia di nascita" },
+      { k: "cittaNascita",           label: "Città di nascita" },
+      { k: "email",                  label: "E-mail" },
+      { k: "telefono",               label: "Telefono" },
+      { k: "fax",                    label: "Fax" }
+    ]
+  },
+  {
+    id: "fatturazione",
+    titolo: "Dati di fatturazione",
+    campi: [
+      { k: "aliquotaIrpef",    label: "Aliquota IRPEF", nota: "menu a tendina" },
+      { k: "baseImponibile",   label: "Base imponibile", nota: "menu a tendina" },
+      { k: "causalePagamento", label: "Causale pagamento", nota: "menu a tendina" },
+      { k: "regimeFiscale",    label: "Regime fiscale", nota: "menu a tendina" }
+    ]
+  },
+  {
+    id: "agente",
+    titolo: "Agente di riferimento",
+    campi: [
+      { k: "nomeAgente",    label: "Nome" },
+      { k: "cognomeAgente", label: "Cognome" }
+    ]
+  },
+  {
+    id: "pagamento",
+    titolo: "Informazioni di pagamento",
+    campi: [
+      { k: "titolareConto", label: "Titolare conto" },
+      { k: "nomeBanca",     label: "Nome banca" },
+      { k: "iban",          label: "IBAN", check: "iban" },
+      { k: "bic",           label: "BIC/SWIFT" }
+    ]
+  },
+  {
+    id: "compensazione",
+    titolo: "Compensazione compensi e fatture in scadenza",
+    campi: [
+      { k: "compensazione", label: "Compensazione", nota: "opzione Sì / No" }
+    ]
+  },
+  {
+    id: "indirizzo",
+    titolo: "Indirizzo di fatturazione",
+    campi: [
+      { k: "provincia",  label: "Provincia" },
+      { k: "citta",      label: "Città" },
+      { k: "cap",        label: "CAP" },
+      { k: "indirizzo",  label: "Indirizzo" }
+    ]
+  }
+];
+
+const DOCUMENTI = [
+  "Cassetto Fiscale",
+  "Documento d'identità",
+  "Scheda Anagrafica",
+  "Visura Camerale",
+  "Contratto",
+  "SEPA",
+  "Modulo Subentro",
+  "Documento Extra"
+];
+
+/* =========================================================================
+   8. RENDER
+   ========================================================================= */
+
+let record = null;
+const LS_KEY = "iliad-fake-company-v1";
+
+// Campi gia' copiati per il record corrente (si azzerano a ogni rigenerazione)
+let copiati = new Set();
+
+const ICON = {
+  copy:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>',
+  file:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>',
+  down:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  regen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"/><path d="M3 21v-5h5"/></svg>'
+};
+
+const el = (tag, cls, txt) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+};
+
+function statoCheck(k, v){
+  if (k === "piva") return pivaValida(v) ? "checksum ok" : "checksum errato";
+  if (k === "cf"){
+    const ok = cfValido(v);
+    if (ok === null) return "";
+    return ok ? "carattere di controllo ok" : "controllo errato";
+  }
+  if (k === "iban") return ibanValido(v) ? "mod 97 ok" : "IBAN errato";
+  return "";
+}
+
+function creaRiga(campo){
+  const row = el("div", "row");
+  row.dataset.key = campo.k;
+  if (copiati.has(campo.k)) row.classList.add("is-copied");
+
+  const lbl = el("div", "lbl");
+  const tick = el("span", "tick");
+  tick.innerHTML = ICON.check;
+  const testo = el("div");
+  testo.appendChild(el("div", "lbl-t", campo.label));
+  if (campo.nota) testo.appendChild(el("span", "hint", campo.nota));
+
+  const st = statoCheck(campo.check, record[campo.k]);
+  if (st){
+    const bad = st.includes("errato");
+    const s = el("span", "status" + (bad ? " bad" : ""));
+    s.innerHTML = bad ? ICON.alert : ICON.check;
+    s.appendChild(document.createTextNode(st));
+    testo.appendChild(s);
+  }
+  lbl.append(tick, testo);
+
+  const val = el("div", "val");
+  val.textContent = record[campo.k] || "";
+  val.title = "Clicca per copiare";
+  val.tabIndex = 0;
+  val.setAttribute("role", "button");
+  val.setAttribute("aria-label", "Copia " + campo.label);
+  val.dataset.key = campo.k;
+
+  const actions = el("div", "actions");
+
+  const rg = el("button", "regen");
+  rg.type = "button";
+  rg.innerHTML = ICON.regen;
+  rg.dataset.key = campo.k;
+  if (RIGENERA[campo.k]){
+    rg.title = "Rigenera " + campo.label;
+    rg.setAttribute("aria-label", "Rigenera " + campo.label);
+    rg.addEventListener("click", () => rigeneraCampo(campo.k));
+  } else {
+    rg.disabled = true;
+    rg.title = NON_RIGENERABILI[campo.k] || "Campo non rigenerabile";
+    rg.setAttribute("aria-label", rg.title);
+  }
+
+  const btn = el("button", "copy");
+  btn.type = "button";
+  btn.innerHTML = ICON.copy + '<span class="copy-t">Copia</span>';
+  btn.setAttribute("aria-label", "Copia " + campo.label);
+  btn.dataset.key = campo.k;
+
+  val.addEventListener("click", () => {
+    if (String(window.getSelection()).length) return; // l'utente sta selezionando
+    copia(campo.k, val, btn);
+  });
+  val.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copia(campo.k, val, btn); }
+  });
+  btn.addEventListener("click", () => copia(campo.k, val, btn));
+
+  actions.append(rg, btn);
+  row.append(lbl, val, actions);
+  return row;
+}
+
+function creaSezione(sez, indice){
+  const s = el("section");
+  s.id = "sez-" + sez.id;
+  const head = el("div", "sect-head");
+  const count = el("span", "count");
+  count.dataset.sez = sez.id;
+  head.append(el("span", "idx", pad2(indice)), el("h2", null, sez.titolo), count);
+  s.appendChild(head);
+
+  const rows = el("div", "rows");
+  sez.campi.forEach(c => rows.appendChild(creaRiga(c)));
+  s.appendChild(rows);
+  return s;
+}
+
+function creaSezioneDocumenti(indice){
+  const s = el("section");
+  s.id = "sez-documenti";
+  const head = el("div", "sect-head");
+  head.append(el("span", "idx", pad2(indice)), el("h2", null, "Documenti"),
+              el("span", "count", "PDF di prova"));
+  s.appendChild(head);
+
+  const box = el("div", "docs");
+  DOCUMENTI.forEach(nome => {
+    const row = el("div", "doc");
+    const t = el("div", "lbl-t");
+    t.innerHTML = ICON.file;
+    t.appendChild(document.createTextNode(nome));
+    row.appendChild(t);
+    const fname = nomeFile(nome);
+    row.appendChild(el("div", "file", fname));
+    const btn = el("button", "copy");
+    btn.type = "button";
+    btn.innerHTML = ICON.down + '<span class="copy-t">Scarica PDF</span>';
+    btn.setAttribute("aria-label", "Scarica PDF " + nome);
+    btn.addEventListener("click", () => scaricaPdf(nome));
+    row.appendChild(btn);
+    box.appendChild(row);
+  });
+  s.appendChild(box);
+  return s;
+}
+
+function nomeFile(documento){
+  const map = {
+    "Cassetto Fiscale": "cassetto_fiscale",
+    "Documento d'identità": "documento_identita",
+    "Scheda Anagrafica": "scheda_anagrafica",
+    "Visura Camerale": "visura_camerale",
+    "Contratto": "contratto",
+    "SEPA": "sepa",
+    "Modulo Subentro": "modulo_subentro",
+    "Documento Extra": "documento_extra"
+  };
+  const tipo = documento === "SEPA" ? "sepa" : (map[documento] || "documento");
+  return `${tipo}_${record._fileBase.slice(0, 28)}.pdf`;
+}
+
+function creaRail(){
+  const list = document.getElementById("railList");
+  list.textContent = "";
+  SEZIONI.forEach((sez, i) => {
+    const li = el("li");
+    const a = el("a");
+    a.href = "#sez-" + sez.id;
+    a.dataset.sez = sez.id;
+    a.append(el("span", "n", String(i + 1)), el("span", "t", sez.titolo), el("span", "c"));
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+  const li = el("li");
+  const a = el("a");
+  a.href = "#sez-documenti";
+  a.dataset.sez = "documenti";
+  a.append(el("span", "n", String(SEZIONI.length + 1)), el("span", "t", "Documenti"), el("span", "c"));
+  li.appendChild(a);
+  list.appendChild(li);
+}
+
+function aggiornaAvanzamento(){
+  let fatti = 0, totali = 0;
+  SEZIONI.forEach(sez => {
+    const n = sez.campi.filter(c => copiati.has(c.k)).length;
+    const m = sez.campi.length;
+    fatti += n; totali += m;
+    const done = n === m;
+    const link = document.querySelector('.rail a[data-sez="' + sez.id + '"]');
+    if (link){
+      link.querySelector(".c").textContent = n + "/" + m;
+      link.classList.toggle("done", done);
+    }
+    const cnt = document.querySelector('.count[data-sez="' + sez.id + '"]');
+    if (cnt){
+      cnt.textContent = done ? "Tutti copiati" : n + " di " + m + " copiati";
+      cnt.classList.toggle("done", done);
+    }
+  });
+  document.getElementById("railBar").style.width = (totali ? (fatti / totali) * 100 : 0) + "%";
+  document.getElementById("railHead").textContent = "Campi copiati: " + fatti + " di " + totali;
+}
+
+let osservatore = null;
+let sezioneAttiva = "azienda";
+function evidenziaRail(){
+  document.querySelectorAll(".rail a").forEach(a => a.classList.toggle("active", a.dataset.sez === sezioneAttiva));
+}
+function osservaSezioni(){
+  if (!("IntersectionObserver" in window)) return;
+  if (osservatore) osservatore.disconnect();
+  osservatore = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      sezioneAttiva = en.target.id.replace("sez-", "");
+      evidenziaRail();
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  document.querySelectorAll("#app section").forEach(s => osservatore.observe(s));
+}
+
+function render(){
+  const app = document.getElementById("app");
+  app.textContent = "";
+  SEZIONI.forEach((sez, i) => app.appendChild(creaSezione(sez, i + 1)));
+  app.appendChild(creaSezioneDocumenti(SEZIONI.length + 1));
+
+  creaRail();
+  evidenziaRail();
+  aggiornaAvanzamento();
+  osservaSezioni();
+
+  const d = new Date(record.generato);
+  const tipo = record.tipoRagioneSociale ? record.tipoRagioneSociale + ", " : "";
+  document.getElementById("stamp").textContent =
+    tipo + "generato il " + d.toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }) +
+    ", resta solo in questo browser";
+}
+
+/* =========================================================================
+   9. COPIA
+   ========================================================================= */
+
+async function scriviClipboard(testo){
+  try {
+    if (navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(testo);
+      return true;
+    }
+  } catch (_) { /* fallback sotto */ }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = testo;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch (_) { return false; }
+}
+
+let toastTimer = null;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+async function copia(key, valEl, btn){
+  const valore = record[key];
+  if (!valore) return;
+  const ok = await scriviClipboard(valore);
+  if (ok){
+    toast("Copiato: " + String(valore).slice(0, 48) + (String(valore).length > 48 ? "..." : ""));
+    copiati.add(key);
+    const row = valEl ? valEl.closest(".row") : null;
+    if (row) row.classList.add("is-copied");
+    aggiornaAvanzamento();
+    if (btn){
+      const t = btn.querySelector(".copy-t");
+      btn.classList.add("done");
+      btn.firstElementChild.outerHTML = ICON.check;
+      if (t) t.textContent = "Copiato";
+      setTimeout(() => {
+        btn.classList.remove("done");
+        btn.firstElementChild.outerHTML = ICON.copy;
+        if (t) t.textContent = "Copia";
+      }, 1200);
+    }
+    if (valEl){ valEl.classList.add("flash"); setTimeout(() => valEl.classList.remove("flash"), 700); }
+  } else {
+    toast("Copia non riuscita: seleziona il valore e premi Ctrl+C");
+  }
+}
+
+function tsvCompleto(){
+  const righe = [];
+  SEZIONI.forEach(sez => {
+    righe.push("# " + sez.titolo);
+    sez.campi.forEach(c => righe.push(c.label + "\t" + (record[c.k] || "")));
+  });
+  return righe.join("\n");
+}
+
+function testoCompleto(){
+  const righe = [];
+  SEZIONI.forEach(sez => {
+    righe.push("== " + sez.titolo + " ==");
+    sez.campi.forEach(c => righe.push(c.label + ": " + (record[c.k] || "")));
+    righe.push("");
+  });
+  return righe.join("\n");
+}
+
+/* =========================================================================
+   10. PDF DI PROVA (senza librerie: PDF 1.4 minimo, una pagina)
+   ========================================================================= */
+
+function makePdf(lines){
+  const esc = s => stripAccents(String(s))
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+  let content = "";
+  let y = 790;
+  lines.forEach((line, i) => {
+    const size = i === 0 ? 16 : 11;
+    const font = i === 0 ? "/F2" : "/F1";
+    content += `BT ${font} ${size} Tf 56 ${y} Td (${esc(line)}) Tj ET\n`;
+    y -= (i === 0 ? 34 : 18);
+  });
+
+  const objs = {};
+  objs[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  objs[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
+  objs[3] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 6 0 R >> >> /Contents 5 0 R >>";
+  objs[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+  objs[5] = "<< /Length " + content.length + " >>\nstream\n" + content + "endstream";
+  objs[6] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>";
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = {};
+  for (let i = 1; i <= 6; i++){
+    offsets[i] = pdf.length;
+    pdf += i + " 0 obj\n" + objs[i] + "\nendobj\n";
+  }
+  const xref = pdf.length;
+  pdf += "xref\n0 7\n0000000000 65535 f \n";
+  for (let i = 1; i <= 6; i++) pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  pdf += "trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF";
+  return new Blob([pdf], { type: "application/pdf" });
+}
+
+function scaricaPdf(documento){
+  const lines = [
+    documento,
+    "",
+    "DOCUMENTO DI PROVA - NON VALIDO",
+    "",
+    "Azienda:      " + record.ragioneSociale,
+    "P.IVA/CF:     " + record.piva,
+    "Codice SDI:   " + record.codiceSdi,
+    "PEC:          " + record.pec,
+    "",
+    "Rappresentante legale: " + record.nomeRappresentante + " " + record.cognomeRappresentante,
+    "Nato/a il:    " + record.dataNascita + " - " + record.cittaNascita + " (" + record.provinciaNascita + ")",
+    "Documento:    " + documento,
+    "",
+    "Generato automaticamente per test della maschera",
+    "\"Crea nuova azienda\" - contiene solo dati di fantasia.",
+    "Nessun valore ha validita legale."
+  ];
+  const blob = makePdf(lines);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nomeFile(documento);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast("PDF di prova scaricato: " + a.download);
+}
+
+/* =========================================================================
+   11. AVVIO
+   ========================================================================= */
+
+function nuovoRecord(){
+  record = generaTutto();
+  copiati = new Set();
+  salva();
+  render();
+}
+
+document.getElementById("btnRegen").addEventListener("click", () => {
+  nuovoRecord();
+  toast("Nuovo record generato");
+});
+
+document.getElementById("btnCopiaTsv").addEventListener("click", async () => {
+  const ok = await scriviClipboard(tsvCompleto());
+  toast(ok ? "Tutti i campi copiati (TSV): incollali in Excel" : "Copia non riuscita");
+});
+
+document.getElementById("btnCopiaTxt").addEventListener("click", async () => {
+  const ok = await scriviClipboard(testoCompleto());
+  toast(ok ? "Tutti i campi copiati (testo)" : "Copia non riuscita");
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  copiati = new Set();
+  document.querySelectorAll(".row.is-copied").forEach(r => r.classList.remove("is-copied"));
+  aggiornaAvanzamento();
+  toast("Spunte azzerate");
+});
+
+function salva(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(record)); } catch (_) {}
+}
+function carica(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const r = JSON.parse(raw);
+    if (r && r._v === 2 && r.ragioneSociale && r.iban) return r;
+  } catch (_) {}
+  return null;
+}
+
+// Altezza reale dell'header, usata dalla barra sezioni su schermi stretti
+function misuraHeader(){
+  const h = document.querySelector("header").offsetHeight;
+  document.documentElement.style.setProperty("--hdr", h + "px");
+}
+window.addEventListener("resize", misuraHeader);
+misuraHeader();
+
+record = carica() || generaTutto();
+salva();
+render();
+
+document.getElementById("tipoSel").addEventListener("change", e => {
+  forzaTipo = e.target.value || null;
+  nuovoRecord();
+  toast(forzaTipo ? "Tipo soggetto: " + forzaTipo : "Tipo soggetto casuale");
+});
+</script>
+</body>
+</html>
