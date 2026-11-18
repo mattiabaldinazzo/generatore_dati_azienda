@@ -480,7 +480,9 @@ const CFG = {
   // Menu "Causale pagamento"
   causaliPagamento: ["S", "T", "U", "ZO", "A"],
   // Menu "Regime fiscale"
-  regimiFiscali: ["RF01", "RF19"]
+  regimiFiscali: ["RF01", "RF19"],
+  // Menu "Tipo Mandato"
+  tipiMandato: ["B2B", "Core"]
 };
 
 /* Banche italiane reali: ABI, denominazione, BIC della capogruppo */
@@ -793,7 +795,7 @@ function generaTutto(){
   const [y, m, d] = persona.dataISO.split("-");
 
   return {
-    _v: 2,
+    _v: 3,
     generato: new Date().toISOString(),
     // 1. Dati azienda
     tipoRagioneSociale: az.tipo,
@@ -813,6 +815,7 @@ function generaTutto(){
     telefono: contatti.telefono,
     fax: contatti.fax,
     // 3. Dati di fatturazione
+    tipoMandato: pick(CFG.tipiMandato),
     aliquotaIrpef: pick(CFG.aliquoteIrpef),
     baseImponibile: pick(CFG.basiImponibili),
     causalePagamento: pick(CFG.causaliPagamento),
@@ -929,6 +932,7 @@ const RIGENERA = {
   baseImponibile: n => { n.baseImponibile = pickDiverso(CFG.basiImponibili, n.baseImponibile); },
   causalePagamento: n => { n.causalePagamento = pickDiverso(CFG.causaliPagamento, n.causalePagamento); },
   regimeFiscale: n => { n.regimeFiscale = pickDiverso(CFG.regimiFiscali, n.regimeFiscale); },
+  tipoMandato: n => { n.tipoMandato = pickDiverso(CFG.tipiMandato, n.tipoMandato); },
   nomeAgente: n => { n.nomeAgente = pickDiverso(NOMI, n.nomeAgente); },
   cognomeAgente: n => { n.cognomeAgente = pickDiverso(COGNOMI, n.cognomeAgente); },
   nomeBanca: n => { n.nomeBanca = pickDiverso(BANCHE.map(b => b.nome), n.nomeBanca); },
@@ -1026,6 +1030,7 @@ const SEZIONI = [
     id: "fatturazione",
     titolo: "Dati di fatturazione",
     campi: [
+      { k: "tipoMandato",      label: "Tipo Mandato", nota: "menu a tendina" },
       { k: "aliquotaIrpef",    label: "Aliquota IRPEF", nota: "menu a tendina" },
       { k: "baseImponibile",   label: "Base imponibile", nota: "menu a tendina" },
       { k: "causalePagamento", label: "Causale pagamento", nota: "menu a tendina" },
@@ -1512,7 +1517,7 @@ function carica(){
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return null;
     const r = JSON.parse(raw);
-    if (r && r._v === 2 && r.ragioneSociale && r.iban) return r;
+    if (r && r._v === 3 && r.ragioneSociale && r.iban) return r;
   } catch (_) {}
   return null;
 }
