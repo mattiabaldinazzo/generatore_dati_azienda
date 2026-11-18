@@ -11,7 +11,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161616" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%23cc0000'/%3E%3Ctext x='12' y='17' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='%23fafaf9' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -110,10 +110,11 @@
   }
   .brand{display:flex; align-items:center; gap:var(--s-3); margin-right:auto; min-width:0}
   .mark{
-    width:32px; height:32px; flex:none; border-radius:var(--r-sm);
-    background:var(--action); color:var(--action-ink);
+    width:40px; height:40px; flex:none; border-radius:var(--r-md);
+    background:var(--surface); border:1px solid var(--line);
     display:inline-grid; place-items:center;
-    font-size:18px; font-weight:600; line-height:1;
+    font-size:24px; line-height:1;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
   }
   h1{font-size:var(--t-h1); font-weight:500; margin:0; letter-spacing:-.02em; line-height:1.2}
   .sub{font-size:var(--t-label); color:var(--muted); margin-top:2px}
@@ -355,6 +356,7 @@
   }
   .qr-actions{display:flex; gap:var(--s-3); flex-wrap:wrap; margin-top:var(--s-1)}
   .qr-actions .btn{height:var(--btn-h-sm); padding:0 var(--s-4); font-size:var(--t-small); background:var(--card)}
+  .qr-actions .btn:disabled{opacity:.4; cursor:not-allowed; transform:none}
   .qr-msg{margin:var(--s-4) 0 0; font-size:var(--t-small); color:var(--muted); min-height:1.5em}
   .qr-msg.bad{color:var(--bad)}
   .qr-msg.ok{color:var(--ok)}
@@ -463,10 +465,10 @@
   <div class="bar">
     <a class="skip-link" href="#app">Vai ai campi</a>
     <div class="brand">
-      <span class="mark" aria-hidden="true">G</span>
+      <span class="mark" aria-hidden="true">&#x1F680;</span>
       <div style="min-width:0">
         <h1>Generatore dati azienda</h1>
-        <div class="sub" id="stamp">Caricamento</div>
+        <div class="sub">Tutte le informazioni, generate in maniera casuale, da utilizzare per la creazione di un'anagrafica aziendale</div>
       </div>
     </div>
     <div class="toolbar">
@@ -529,6 +531,7 @@
           <p class="hint">QR a schermo: premi <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>, seleziona l'area del codice, poi torna qui e premi <kbd>Ctrl</kbd>+<kbd>V</kbd>.</p>
           <div class="qr-actions">
             <button class="btn" id="qrFileBtn" type="button">Scegli immagini</button>
+            <button class="btn" id="qrReset" type="button" disabled>Rimuovi immagini</button>
             <input type="file" id="qrFile" accept="image/*" multiple hidden>
           </div>
         </div>
@@ -1450,11 +1453,6 @@ function render(){
   aggiornaAvanzamento();
   osservaSezioni();
 
-  const d = new Date(record.generato);
-  const tipo = record.tipoRagioneSociale ? record.tipoRagioneSociale + ", " : "";
-  document.getElementById("stamp").textContent =
-    tipo + "generato il " + d.toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }) +
-    ", resta solo in questo browser";
 }
 
 /* =========================================================================
@@ -1784,6 +1782,12 @@ function qrPulisci(){
   const out = document.getElementById("qrOut");
   out.querySelectorAll("img").forEach(i => URL.revokeObjectURL(i.src));
   out.textContent = "";
+  qrStatoReset();
+}
+
+// "Rimuovi immagini" e' attivo solo se c'e' qualcosa da togliere e nessuna lettura in corso
+function qrStatoReset(){
+  document.getElementById("qrReset").disabled = qrInCorso || !document.getElementById("qrOut").children.length;
 }
 
 let qrInCorso = false;
@@ -1805,6 +1809,7 @@ async function qrDaImmagini(lista, origine){
       const nome = (f.name && f.name !== "image.png") ? f.name : (origine === "incolla" ? "Immagine incollata" : "Immagine " + (i + 1));
       const b = qrBlocco(f, tot > 1 ? (i + 1) + ". " + nome : nome);
       out.appendChild(b.item);
+      qrStatoReset();
       qrMsg(tot > 1 ? "Lettura immagine " + (i + 1) + " di " + tot + "..." : "Lettura in corso...");
 
       let r;
@@ -1840,6 +1845,7 @@ async function qrDaImmagini(lista, origine){
     qrMsg(parti.join(", "), qrTot ? "ok" : "bad");
   } finally {
     qrInCorso = false;
+    qrStatoReset();
   }
 }
 
@@ -1848,6 +1854,12 @@ async function qrDaImmagini(lista, origine){
   const drop = document.getElementById("qrDrop");
 
   document.getElementById("qrFileBtn").addEventListener("click", () => file.click());
+  document.getElementById("qrReset").addEventListener("click", () => {
+    qrPulisci();
+    qrMsg("");
+    file.value = "";
+    toast("Immagini rimosse");
+  });
   file.addEventListener("change", () => {
     if (file.files.length) qrDaImmagini(file.files, "file");
     file.value = "";
