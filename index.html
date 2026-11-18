@@ -510,6 +510,7 @@
           <li>Il pulsante con le due frecce rigenera solo quel campo. Se altri campi dipendono da lui, si aggiornano insieme e si evidenziano in giallo: per esempio il codice fiscale segue nome, data e comune di nascita, l'IBAN e il BIC seguono la banca.</li>
           <li>I valori derivati sono coerenti: titolare del conto uguale al rappresentante legale. Con <b>Persona fisica</b> il codice fiscale è quello della persona, con <b>Persona giuridica</b> coincide con la P.IVA.</li>
           <li>P.IVA, codice fiscale e IBAN rispettano i caratteri di controllo: la maschera non li rifiuta.</li>
+          <li>E-mail e PEC hanno sempre <code>.test</code> prima della chiocciola; telefono e fax hanno un prefisso vero seguito da sequenze di comodo (0000123, 5555555, 1234567): nessuno dei due coincide con contatti reali.</li>
           <li>Il <b>Lettore QR</b> in fondo legge i QR da immagini incollate con <code>Ctrl+V</code>, trascinate o scelte dal PC, anche piu' di una alla volta. I link non si aprono da soli: controlla il dominio prima di premere <b>Apri</b>.</li>
           <li>Le tendine usano le voci reali della maschera. Se ne arrivano di nuove, le aggiorni in un solo punto: l'oggetto <code>CFG</code> in cima allo script.</li>
         </ul>
@@ -809,13 +810,31 @@ function ragioneFisica(nome, cognome, cognomePrima){
   const n = nome.toUpperCase(), c = cognome.toUpperCase();
   return (cognomePrima ? `${c} ${n}` : `${n} ${c}`).replace(/\s+/g, " ").trim();
 }
+// Email e PEC finiscono sempre con ".test" prima della chiocciola:
+// cosi' non coincidono con caselle reali.
 function pecDa(ragione, dominio){
   const base = slug(ragione).split(".").slice(0, 2).join("") || "azienda";
-  return `${base}@${dominio}`;
+  return `${base}.test@${dominio}`;
 }
 function emailDa(nome, cognome, dominio){
   const base = slug(`${cognome}${nome}`) || "contatto";
-  return `${base}@${dominio}`;
+  return `${base}.test@${dominio}`;
+}
+
+// Telefono e fax: prefisso vero (la maschera lo accetta), poi 7 cifre
+// a schema, che nessuno si aspetta da un numero reale.
+const SEQ_FINTE = [
+  () => "0000" + digits(3),                                        // 0000xyz
+  () => String(rnd(10)).repeat(7),                                 // 5555555
+  () => "1234567",
+  () => "7654321",
+  () => { const a = rnd(10), b = (a + 1 + rnd(9)) % 10; return `${a}${b}`.repeat(4).slice(0, 7); }, // 1212121
+  () => { const d = String(rnd(10)); return d.repeat(3) + "0" + d.repeat(3); }                    // 3330333
+];
+function numeroFinto(prefisso, attuale){
+  let n;
+  do { n = prefisso + pick(SEQ_FINTE)(); } while (n === attuale);
+  return n;
 }
 
 function genAzienda(persona){
@@ -850,8 +869,8 @@ function genSdi(){
 
 function genContatti(persona, comuneSede){
   const email = emailDa(persona.nome, persona.cognome, pick(DOMINI_EMAIL));
-  const telefono = pick(PREFISSI_MOBILE) + digits(7);
-  const fax = comuneSede.tel + digits(7);
+  const telefono = numeroFinto(pick(PREFISSI_MOBILE));
+  const fax = numeroFinto(comuneSede.tel);
   return { email, telefono, fax };
 }
 
@@ -886,7 +905,7 @@ function generaTutto(){
   const [y, m, d] = persona.dataISO.split("-");
 
   return {
-    _v: 3,
+    _v: 4,
     generato: new Date().toISOString(),
     // 1. Dati azienda
     tipoRagioneSociale: az.tipo,
@@ -979,7 +998,7 @@ function allinea(n, vecchio){
   const sede = comuneDa(n.citta);
   n.provincia = sede.pr;
   n.cap = sede.cap;
-  if (n.citta !== vecchio.citta) n.fax = sede.tel + digits(7);
+  if (n.citta !== vecchio.citta) n.fax = numeroFinto(sede.tel);
   return n;
 }
 
@@ -1017,8 +1036,8 @@ const RIGENERA = {
   provinciaNascita: n => { n.cittaNascita = pickDiverso(COMUNI.map(c => c.nome), n.cittaNascita); },
   cittaNascita: n => { n.cittaNascita = pickDiverso(COMUNI.map(c => c.nome), n.cittaNascita); },
   email: n => { n.email = emailDa(n.nomeRappresentante, n.cognomeRappresentante, pickDiverso(DOMINI_EMAIL, dominioDi(n.email))); },
-  telefono: n => { n.telefono = pick(PREFISSI_MOBILE) + digits(7); },
-  fax: n => { n.fax = comuneDa(n.citta).tel + digits(7); },
+  telefono: n => { n.telefono = numeroFinto(pick(PREFISSI_MOBILE), n.telefono); },
+  fax: n => { n.fax = numeroFinto(comuneDa(n.citta).tel, n.fax); },
   aliquotaIrpef: n => { n.aliquotaIrpef = pickDiverso(CFG.aliquoteIrpef, n.aliquotaIrpef); },
   baseImponibile: n => { n.baseImponibile = pickDiverso(CFG.basiImponibili, n.baseImponibile); },
   causalePagamento: n => { n.causalePagamento = pickDiverso(CFG.causaliPagamento, n.causalePagamento); },
@@ -1905,7 +1924,7 @@ function carica(){
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return null;
     const r = JSON.parse(raw);
-    if (r && r._v === 3 && r.ragioneSociale && r.iban) return r;
+    if (r && r._v === 4 && r.ragioneSociale && r.iban) return r;
   } catch (_) {}
   return null;
 }
