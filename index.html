@@ -79,7 +79,7 @@
   /* ---------------------------------------------------------------- base */
   *{box-sizing:border-box}
   html,body{margin:0}
-  html{scroll-behavior:smooth; scroll-padding-top:calc(var(--hdr, var(--nav)) + var(--s-5))}
+  html{scroll-behavior:smooth; scroll-padding-top:calc(var(--cover, var(--nav)) + var(--s-5))}
   body{
     background:var(--bg); color:var(--ink);
     font:400 var(--t-body)/1.5 var(--font-text);
@@ -380,11 +380,9 @@
   }
 
   /* ---------------------------------------------------------------- footer */
-  footer{
-    max-width:calc(var(--wrap) + 2 * var(--gut)); margin:0 auto; padding:0 var(--gut) var(--s-8);
-    font-size:var(--t-small); color:var(--muted);
-  }
-  footer .inner{margin-left:calc(248px + var(--s-6)); border-top:1px solid var(--line); padding-top:var(--s-5)}
+  /* le note stanno nella colonna principale: cosi' la barra laterale resta ferma fino in fondo */
+  footer{margin-top:var(--s-7); font-size:var(--t-small); color:var(--muted)}
+  footer .inner{border-top:1px solid var(--line); padding-top:var(--s-5)}
   footer h3{font-size:var(--t-small); font-weight:600; color:var(--ink); margin:0 0 var(--s-2)}
   footer ul{margin:0; padding-left:var(--s-4); max-width:62ch}
   footer li{margin:var(--s-1) 0; line-height:1.6}
@@ -431,7 +429,6 @@
       font-size:var(--t-label); line-height:1.2; white-space:normal}
     .toolbar > .btn{flex:1 1 100%}
     .shell{padding:var(--s-3) var(--gut) var(--s-7)}
-    footer{padding:0 var(--gut) var(--s-7)}
     .sect-head{padding:var(--s-4) var(--s-4) var(--s-2)}
     .rows,.docs{padding:0 var(--s-1) var(--s-2)}
     .row,.doc{grid-template-columns:minmax(0,1fr) auto; gap:var(--s-2) var(--s-3)}
@@ -539,19 +536,20 @@
         <div class="qr-out" id="qrOut"></div>
       </div>
     </section>
+
+    <footer>
+      <div class="inner">
+        <h3>Note</h3>
+        <ul>
+          <li>Dati inventati e generati nel browser: nessuna connessione, nessun salvataggio su server. Non corrispondono a persone, aziende o conti reali.</li>
+          <li>Codici ABI e BIC appartengono a banche italiane reali (BIC della capogruppo): servono solo a rendere il test plausibile.</li>
+          <li>Da usare su ambienti o record di test. Le aziende create in produzione restano nel database.</li>
+        </ul>
+      </div>
+    </footer>
   </main>
 </div>
 
-<footer>
-  <div class="inner">
-    <h3>Note</h3>
-    <ul>
-      <li>Dati inventati e generati nel browser: nessuna connessione, nessun salvataggio su server. Non corrispondono a persone, aziende o conti reali.</li>
-      <li>Codici ABI e BIC appartengono a banche italiane reali (BIC della capogruppo): servono solo a rendere il test plausibile.</li>
-      <li>Da usare su ambienti o record di test. Le aziende create in produzione restano nel database.</li>
-    </ul>
-  </div>
-</footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1930,11 +1928,27 @@ function carica(){
 }
 
 // Altezza reale dell'header, usata dalla barra sezioni su schermi stretti
+// Altezze reali di cio' che resta fisso in alto. Si ricalcolano a ogni cambio:
+// il font arriva dopo il caricamento e puo' mandare a capo i bottoni dell'header.
+// --hdr: header (la barra laterale si ferma sotto di lui)
+// --cover: tutto cio' che copre la pagina in alto (lo scorrimento alle sezioni si ferma sotto)
 function misuraHeader(){
-  const h = document.querySelector("header").offsetHeight;
-  document.documentElement.style.setProperty("--hdr", h + "px");
+  const header = document.querySelector("header");
+  const rail = document.querySelector(".rail");
+  const h = header.offsetHeight;
+  const headerFisso = getComputedStyle(header).position !== "static";
+  const railInAlto = matchMedia("(max-width:1023px)").matches ? rail.offsetHeight : 0;
+  const root = document.documentElement.style;
+  root.setProperty("--hdr", h + "px");
+  root.setProperty("--cover", ((headerFisso ? h : 0) + railInAlto) + "px");
 }
 window.addEventListener("resize", misuraHeader);
+if ("ResizeObserver" in window){
+  const ro = new ResizeObserver(misuraHeader);
+  ro.observe(document.querySelector("header"));
+  ro.observe(document.querySelector(".rail"));
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(misuraHeader);
 misuraHeader();
 
 record = carica() || generaTutto();
