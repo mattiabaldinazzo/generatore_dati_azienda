@@ -79,7 +79,7 @@
   /* ---------------------------------------------------------------- base */
   *{box-sizing:border-box}
   html,body{margin:0}
-  html{scroll-behavior:smooth; scroll-padding-top:calc(var(--nav) + var(--s-5))}
+  html{scroll-behavior:smooth; scroll-padding-top:calc(var(--hdr, var(--nav)) + var(--s-5))}
   body{
     background:var(--bg); color:var(--ink);
     font:400 var(--t-body)/1.5 var(--font-text);
@@ -167,7 +167,7 @@
   }
 
   /* barra laterale: avanzamento lungo la maschera */
-  .rail{position:sticky; top:calc(var(--nav) + var(--s-5))}
+  .rail{position:sticky; top:calc(var(--hdr, var(--nav)) + var(--s-5))}
   .rail-head{font-size:var(--t-label); font-weight:500; color:var(--muted); margin:0 0 var(--s-2) var(--s-3)}
   .rail-total{
     margin:0 var(--s-3) var(--s-4); height:4px; border-radius:2px; background:var(--line); overflow:hidden;
@@ -195,6 +195,11 @@
   .rail a.active .n{border-color:var(--action); color:var(--ink)}
   .rail a.done .n{background:var(--ok); border-color:var(--ok); color:var(--card)}
   .rail .c{font-size:var(--t-label)}
+  .rail .n svg{width:14px; height:14px}
+  .rail-sep{
+    margin:var(--s-4) var(--s-3) var(--s-1); padding-top:var(--s-3); border-top:1px solid var(--line);
+    font-size:var(--t-label); font-weight:500; color:var(--muted);
+  }
   .rail a.done .c{color:var(--ok)}
   .rail-reset{
     margin:var(--s-3) 0 0 var(--s-3); padding:var(--s-2) 0; background:none; border:0; cursor:pointer;
@@ -316,6 +321,54 @@
   .doc .lbl-t svg{width:18px; height:18px; color:var(--muted); flex:none}
   .doc .file{font-family:var(--font-mono); font-size:var(--t-small); color:var(--muted); word-break:break-all}
 
+  /* ---------------------------------------------------------------- lettore QR */
+  .tools-head{
+    margin:var(--s-7) 0 var(--s-3); padding-top:var(--s-5); border-top:1px solid var(--line);
+    font-size:var(--t-label); font-weight:500; color:var(--muted);
+  }
+  .sect-head .ico{align-self:center; display:grid; color:var(--muted)}
+  .sect-head .ico svg{width:18px; height:18px}
+  .qr{padding:0 var(--s-5) var(--s-5)}
+  .qr-drop{
+    display:grid; gap:var(--s-3); justify-items:start;
+    padding:var(--s-5); border-radius:var(--r-lg);
+    background:var(--surface); border:1px dashed var(--line-strong);
+    transition:background-color var(--m-out) var(--ease), border-color var(--m-out) var(--ease);
+  }
+  .qr-drop.over{background:var(--card); border-color:var(--action); transition-duration:var(--m-in)}
+  .qr-drop p{margin:0; max-width:62ch; line-height:1.6}
+  .qr-drop .hint{font-size:var(--t-small)}
+  kbd{
+    font-family:var(--font-mono); font-size:var(--t-label);
+    padding:1px 6px; border-radius:var(--r-sm);
+    background:var(--card); border:1px solid var(--line-strong);
+  }
+  .qr-actions{display:flex; gap:var(--s-3); flex-wrap:wrap; margin-top:var(--s-1)}
+  .qr-actions .btn{height:var(--btn-h-sm); padding:0 var(--s-4); font-size:var(--t-small); background:var(--card)}
+  .qr-msg{margin:var(--s-4) 0 0; font-size:var(--t-small); color:var(--muted); min-height:1.5em}
+  .qr-msg.bad{color:var(--bad)}
+  .qr-msg.ok{color:var(--ok)}
+  .qr-out{display:grid; gap:var(--s-3); margin-top:var(--s-3)}
+  .qr-item{
+    display:grid; grid-template-columns:120px minmax(0,1fr); gap:var(--s-4); align-items:start;
+    padding:var(--s-3); border:1px solid var(--line); border-radius:var(--r-lg);
+  }
+  .qr-thumb img{
+    display:block; width:120px; max-height:120px; object-fit:contain;
+    border:1px solid var(--line); border-radius:var(--r-md); background:var(--card);
+  }
+  .qr-name{font-size:var(--t-small); font-weight:500; word-break:break-all; padding:var(--s-1) var(--s-3) var(--s-2)}
+  .qr-name .hint{display:inline; margin-left:var(--s-2)}
+  .qr-name.bad .hint{color:var(--bad)}
+  .qr-item .rows{padding:0}
+  .qr-item .row{grid-template-columns:140px minmax(0,1fr) auto}
+  .qr-item a.copy{text-decoration:none}
+  @media (max-width:720px){
+    .qr{padding:0 var(--s-4) var(--s-4)}
+    .qr-item{grid-template-columns:minmax(0,1fr)}
+    .qr-item .row{grid-template-columns:minmax(0,1fr) auto}
+  }
+
   /* ---------------------------------------------------------------- footer */
   footer{
     max-width:calc(var(--wrap) + 2 * var(--gut)); margin:0 auto; padding:0 var(--gut) var(--s-8);
@@ -350,6 +403,7 @@
     .rail a{grid-template-columns:auto auto; padding:0 var(--s-3) 0 var(--s-2); border-radius:var(--r-btn);
       background:var(--card); border-color:var(--line); white-space:nowrap}
     .rail a .c{display:none}
+    .rail-sep{flex:none; width:1px; margin:var(--s-1) var(--s-1); padding:0; border:0; background:var(--line); font-size:0}
     footer .inner{margin-left:0}
   }
   @media (max-width:720px){
@@ -386,7 +440,7 @@
     .btn,.copy,.regen{transform:none !important}
   }
   @media print{
-    header{position:static} .toolbar,.actions,.copy,.rail,.intro,.skip-link{display:none}
+    header{position:static} .toolbar,.actions,.copy,.rail,.intro,.skip-link,#sez-qr{display:none}
     .shell{display:block}
     body{background:#fff}
     footer .inner{margin-left:0}
@@ -441,12 +495,34 @@
           <li>Il pulsante con le due frecce rigenera solo quel campo. Se altri campi dipendono da lui, si aggiornano insieme e si evidenziano in giallo: per esempio il codice fiscale segue nome, data e comune di nascita, l'IBAN e il BIC seguono la banca.</li>
           <li>I valori derivati sono coerenti: titolare del conto uguale al rappresentante legale. Con <b>Persona fisica</b> il codice fiscale è quello della persona, con <b>Persona giuridica</b> coincide con la P.IVA.</li>
           <li>P.IVA, codice fiscale e IBAN rispettano i caratteri di controllo: la maschera non li rifiuta.</li>
+          <li>Il <b>Lettore QR</b> in fondo legge i QR da immagini incollate con <code>Ctrl+V</code>, trascinate o scelte dal PC, anche piu' di una alla volta. I link non si aprono da soli: controlla il dominio prima di premere <b>Apri</b>.</li>
           <li>Le tendine usano le voci reali della maschera. Se ne arrivano di nuove, le aggiorni in un solo punto: l'oggetto <code>CFG</code> in cima allo script.</li>
         </ul>
       </div>
     </details>
 
     <div id="app" tabindex="-1"></div>
+
+    <p class="tools-head">Strumenti</p>
+    <section id="sez-qr" aria-labelledby="qrTitolo">
+      <div class="sect-head">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg></span>
+        <h2 id="qrTitolo">Lettore QR</h2>
+        <span class="count">Letto nel browser, nessun invio</span>
+      </div>
+      <div class="qr">
+        <div class="qr-drop" id="qrDrop">
+          <p><b>Incolla</b> un'immagine con <kbd>Ctrl</kbd>+<kbd>V</kbd>, <b>trascina</b> qui una o piu' immagini o sceglile dal PC.</p>
+          <p class="hint">QR a schermo: premi <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>, seleziona l'area del codice, poi torna qui e premi <kbd>Ctrl</kbd>+<kbd>V</kbd>.</p>
+          <div class="qr-actions">
+            <button class="btn" id="qrFileBtn" type="button">Scegli immagini</button>
+            <input type="file" id="qrFile" accept="image/*" multiple hidden>
+          </div>
+        </div>
+        <p class="qr-msg" id="qrMsg" role="status" aria-live="polite"></p>
+        <div class="qr-out" id="qrOut"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -1101,6 +1177,7 @@ const ICON = {
   alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>',
   file:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>',
   down:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  qr:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
   regen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"/><path d="M3 21v-5h5"/></svg>'
 };
 
@@ -1266,6 +1343,20 @@ function creaRail(){
   a.append(el("span", "n", String(SEZIONI.length + 1)), el("span", "t", "Documenti"), el("span", "c"));
   li.appendChild(a);
   list.appendChild(li);
+
+  // Strumenti: fuori dalla sequenza della maschera, senza numero
+  const sep = el("li", "rail-sep", "Strumenti");
+  sep.setAttribute("role", "presentation");
+  list.appendChild(sep);
+  const liQr = el("li");
+  const aQr = el("a");
+  aQr.href = "#sez-qr";
+  aQr.dataset.sez = "qr";
+  const icoQr = el("span", "n");
+  icoQr.innerHTML = ICON.qr;
+  aQr.append(icoQr, el("span", "t", "Lettore QR"), el("span", "c"));
+  liQr.appendChild(aQr);
+  list.appendChild(liQr);
 }
 
 function aggiornaAvanzamento(){
@@ -1305,7 +1396,7 @@ function osservaSezioni(){
       evidenziaRail();
     });
   }, { rootMargin: "-30% 0px -60% 0px" });
-  document.querySelectorAll("#app section").forEach(s => osservatore.observe(s));
+  document.querySelectorAll("main section").forEach(s => osservatore.observe(s));
 }
 
 function render(){
@@ -1477,7 +1568,281 @@ function scaricaPdf(documento){
 }
 
 /* =========================================================================
-   11. AVVIO
+   11. LETTORE QR
+   Libreria: zxing-wasm (MIT, basata su zxing-cpp), copiata in vendor/.
+   Si carica solo al primo uso. Le immagini restano nel browser: nessun upload.
+   Il contenuto dei QR non viene mai aperto in automatico.
+   ========================================================================= */
+
+const QR_OPTS = {
+  formats: ["QRCode", "MicroQRCode", "RMQRCode"],
+  tryHarder: true,
+  maxNumberOfSymbols: 8
+};
+
+let qrLib = null;
+function qrCaricaLib(){
+  if (qrLib) return qrLib;
+  qrLib = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "vendor/zxing-reader.js";
+    s.onload = () => {
+      ZXingWASM.prepareZXingModule({
+        overrides: {
+          locateFile: (path, prefix) =>
+            path.endsWith(".wasm") ? new URL("vendor/" + path, location.href).href : prefix + path
+        },
+        fireImmediately: true
+      }).then(() => resolve(ZXingWASM), reject);
+    };
+    s.onerror = () => reject(new Error("script non caricato"));
+    document.head.appendChild(s);
+  });
+  qrLib.catch(() => { qrLib = null; });
+  return qrLib;
+}
+
+function qrMsg(testo, tipo){
+  const m = document.getElementById("qrMsg");
+  m.textContent = testo || "";
+  m.className = "qr-msg" + (tipo ? " " + tipo : "");
+}
+
+// Disegna l'immagine su canvas, con eventuale ingrandimento senza sfocatura:
+// aiuta con i QR piccoli dentro screenshot grandi.
+function qrImageData(src, w, h, scala){
+  const max = 4096;
+  const k = Math.min(scala, max / w, max / h);
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w * k));
+  c.height = Math.max(1, Math.round(h * k));
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return ctx.getImageData(0, 0, c.width, c.height);
+}
+
+async function qrDecodifica(imageData){
+  const Z = await qrCaricaLib();
+  const res = await Z.readBarcodes(imageData, QR_OPTS);
+  const visti = new Set();
+  return res.filter(r => r.isValid && r.text && !visti.has(r.text) && visti.add(r.text));
+}
+
+// Legge una singola immagine: { testi: [...] } oppure { errore: "..." }
+async function qrLeggiImmagine(blob){
+  let bmp;
+  try { bmp = await createImageBitmap(blob); }
+  catch (_) { return { errore: "formato non supportato, usa PNG o JPG" }; }
+  try {
+    let res = await qrDecodifica(qrImageData(bmp, bmp.width, bmp.height, 1));
+    if (!res.length && bmp.width * bmp.height < 4e6){
+      res = await qrDecodifica(qrImageData(bmp, bmp.width, bmp.height, 2));
+    }
+    return { testi: res.map(r => r.text) };
+  } finally {
+    if (bmp.close) bmp.close();
+  }
+}
+
+// Descrive il contenuto senza aprirlo
+function qrTipo(t){
+  if (/^https?:\/\//i.test(t)){
+    try {
+      const u = new URL(t);
+      return { tipo: (u.protocol === "https:" ? "Link a " : "Link non sicuro (http) a ") + u.hostname, link: u.href };
+    } catch (_) { return { tipo: "Testo" }; }
+  }
+  if (/^WIFI:/i.test(t)) return { tipo: "Rete Wi-Fi" };
+  if (/^BEGIN:VCARD/i.test(t)) return { tipo: "Contatto (vCard)" };
+  if (/^BEGIN:VEVENT|^BEGIN:VCALENDAR/i.test(t)) return { tipo: "Evento di calendario" };
+  if (/^mailto:/i.test(t)) return { tipo: "Indirizzo email" };
+  if (/^tel:/i.test(t)) return { tipo: "Numero di telefono" };
+  if (/^(smsto|sms):/i.test(t)) return { tipo: "SMS" };
+  if (/^BCD\n/.test(t)) return { tipo: "Bonifico SEPA (EPC)" };
+  if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return { tipo: "Link di tipo " + t.split(":")[0].toLowerCase() + ", controlla prima di usarlo" };
+  return { tipo: "Testo" };
+}
+
+async function qrCopia(testo, btn, valEl){
+  const ok = await scriviClipboard(testo);
+  if (!ok){ toast("Copia non riuscita: seleziona il testo e premi Ctrl+C"); return; }
+  toast("Copiato: " + testo.slice(0, 48) + (testo.length > 48 ? "..." : ""));
+  if (valEl){ valEl.classList.add("flash"); setTimeout(() => valEl.classList.remove("flash"), 700); }
+  if (btn){
+    const t = btn.querySelector(".copy-t");
+    btn.classList.add("done");
+    btn.firstElementChild.outerHTML = ICON.check;
+    if (t) t.textContent = "Copiato";
+    setTimeout(() => {
+      btn.classList.remove("done");
+      btn.firstElementChild.outerHTML = ICON.copy;
+      if (t) t.textContent = "Copia";
+    }, 1600);
+  }
+}
+
+function qrRiga(testo, n){
+  const info = qrTipo(testo);
+  const row = el("div", "row");
+
+  const lbl = el("div", "lbl");
+  const lt = el("span", "lbl-t", "QR " + n);
+  lt.appendChild(el("span", "hint", info.tipo));
+  lbl.appendChild(lt);
+
+  const val = el("div", "val", testo);   // solo textContent: il QR non puo' iniettare HTML
+  val.tabIndex = 0;
+  val.title = "Clicca per copiare";
+
+  const actions = el("div", "actions");
+  if (info.link){
+    const a = el("a", "copy");
+    a.href = info.link;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = "Apri";
+    a.title = "Apre " + info.link + " in una nuova scheda: controlla prima il dominio";
+    actions.appendChild(a);
+  }
+  const btn = el("button", "copy");
+  btn.type = "button";
+  btn.innerHTML = ICON.copy + '<span class="copy-t">Copia</span>';
+  btn.setAttribute("aria-label", "Copia contenuto QR " + n);
+  btn.addEventListener("click", () => qrCopia(testo, btn, val));
+  val.addEventListener("click", () => qrCopia(testo, btn, val));
+  val.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " "){ e.preventDefault(); qrCopia(testo, btn, val); }
+  });
+  actions.appendChild(btn);
+
+  row.append(lbl, val, actions);
+  return row;
+}
+
+// Blocco di una immagine: miniatura a sinistra, nome ed esito a destra
+function qrBlocco(blob, nome){
+  const item = el("div", "qr-item");
+  const thumb = el("div", "qr-thumb");
+  const img = el("img");
+  img.alt = nome;
+  img.src = URL.createObjectURL(blob);
+  thumb.appendChild(img);
+
+  const destra = el("div");
+  const titolo = el("div", "qr-name", nome);
+  const stato = el("span", "hint", "lettura in corso...");
+  titolo.appendChild(stato);
+  const rows = el("div", "rows");
+  destra.append(titolo, rows);
+
+  item.append(thumb, destra);
+  return { item, titolo, stato, rows };
+}
+
+function qrPulisci(){
+  const out = document.getElementById("qrOut");
+  out.querySelectorAll("img").forEach(i => URL.revokeObjectURL(i.src));
+  out.textContent = "";
+}
+
+let qrInCorso = false;
+async function qrDaImmagini(lista, origine){
+  if (qrInCorso){ toast("Attendi la fine della lettura in corso"); return; }
+  const immagini = [...lista].filter(f => f && /^image\//.test(f.type));
+  const scartati = lista.length - immagini.length;
+  if (!immagini.length){ qrMsg("Nessuna immagine: usa file PNG o JPG.", "bad"); return; }
+
+  qrInCorso = true;
+  qrPulisci();
+  const out = document.getElementById("qrOut");
+  const tot = immagini.length;
+  let qrTot = 0, senza = 0, errori = 0;
+
+  try {
+    for (let i = 0; i < tot; i++){
+      const f = immagini[i];
+      const nome = (f.name && f.name !== "image.png") ? f.name : (origine === "incolla" ? "Immagine incollata" : "Immagine " + (i + 1));
+      const b = qrBlocco(f, tot > 1 ? (i + 1) + ". " + nome : nome);
+      out.appendChild(b.item);
+      qrMsg(tot > 1 ? "Lettura immagine " + (i + 1) + " di " + tot + "..." : "Lettura in corso...");
+
+      let r;
+      try { r = await qrLeggiImmagine(f); }
+      catch (e) {
+        qrMsg("Lettore QR non disponibile: libreria non caricata (" + (e.message || e.name) + "). Ricarica la pagina.", "bad");
+        b.stato.textContent = "non letta";
+        b.titolo.classList.add("bad");
+        return;
+      }
+
+      if (r.errore){
+        errori++;
+        b.stato.textContent = r.errore;
+        b.titolo.classList.add("bad");
+      } else if (!r.testi.length){
+        senza++;
+        b.stato.textContent = "nessun QR trovato: ritaglia piu' stretto o usa un'immagine piu' nitida";
+        b.titolo.classList.add("bad");
+      } else {
+        b.stato.textContent = r.testi.length === 1 ? "1 QR" : r.testi.length + " QR";
+        r.testi.forEach((t, k) => b.rows.appendChild(qrRiga(t, k + 1)));
+        qrTot += r.testi.length;
+      }
+    }
+
+    const parti = [];
+    parti.push((tot === 1 ? "1 immagine letta" : tot + " immagini lette") + ": " +
+               (qrTot === 1 ? "1 QR trovato" : qrTot + " QR trovati"));
+    if (senza) parti.push(senza === 1 ? "1 senza QR" : senza + " senza QR");
+    if (errori) parti.push(errori === 1 ? "1 non leggibile" : errori + " non leggibili");
+    if (scartati) parti.push(scartati === 1 ? "1 file ignorato perche' non e' un'immagine" : scartati + " file ignorati perche' non sono immagini");
+    qrMsg(parti.join(", "), qrTot ? "ok" : "bad");
+  } finally {
+    qrInCorso = false;
+  }
+}
+
+(function qrInit(){
+  const file = document.getElementById("qrFile");
+  const drop = document.getElementById("qrDrop");
+
+  document.getElementById("qrFileBtn").addEventListener("click", () => file.click());
+  file.addEventListener("change", () => {
+    if (file.files.length) qrDaImmagini(file.files, "file");
+    file.value = "";
+  });
+
+  // Incolla: funziona ovunque nella pagina, senza permessi.
+  // Copiando piu' file da Esplora risorse, il browser di solito ne passa uno solo:
+  // per piu' immagini usa "Scegli immagini" o il trascinamento.
+  document.addEventListener("paste", e => {
+    const items = e.clipboardData ? [...e.clipboardData.items] : [];
+    const imgs = items.filter(i => i.kind === "file" && i.type.startsWith("image/")).map(i => i.getAsFile());
+    if (!imgs.length) return;
+    e.preventDefault();
+    document.getElementById("sez-qr").scrollIntoView({ block: "start" });
+    qrDaImmagini(imgs, "incolla");
+  });
+
+  // Trascina e rilascia, anche piu' file insieme
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault();
+    drop.classList.add("over");
+  }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", e => {
+    e.preventDefault();
+    const files = e.dataTransfer ? e.dataTransfer.files : [];
+    if (files.length) qrDaImmagini(files, "file");
+  });
+  // Evita che un'immagine lasciata fuori dalla zona venga aperta dal browser
+  window.addEventListener("dragover", e => e.preventDefault());
+  window.addEventListener("drop", e => e.preventDefault());
+})();
+
+/* =========================================================================
+   12. AVVIO
    ========================================================================= */
 
 function nuovoRecord(){
