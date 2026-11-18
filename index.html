@@ -166,45 +166,55 @@
     display:grid; grid-template-columns:248px minmax(0,1fr); gap:var(--s-6); align-items:start;
   }
 
-  /* barra laterale: avanzamento lungo la maschera */
-  .rail{position:sticky; top:calc(var(--hdr, var(--nav)) + var(--s-5))}
-  .rail-head{font-size:var(--t-label); font-weight:500; color:var(--muted); margin:0 0 var(--s-2) var(--s-3)}
+  /* barra laterale: avanzamento compatto, poi gli strumenti */
+  .rail{
+    position:sticky; top:calc(var(--hdr, var(--nav)) + var(--s-5));
+    max-height:calc(100vh - var(--hdr, var(--nav)) - var(--s-7)); overflow-y:auto; scrollbar-width:thin;
+  }
+  .rail-top{display:flex; align-items:baseline; justify-content:space-between; gap:var(--s-2); margin:0 var(--s-3) var(--s-2)}
+  .rail-head{font-size:var(--t-label); font-weight:500; color:var(--muted); margin:0}
   .rail-total{
-    margin:0 var(--s-3) var(--s-4); height:4px; border-radius:2px; background:var(--line); overflow:hidden;
+    margin:0 var(--s-3) var(--s-3); height:4px; border-radius:2px; background:var(--line); overflow:hidden;
   }
   .rail-total i{
     display:block; height:100%; width:100%; background:var(--ok);
     transform-origin:left; transform:scaleX(var(--p, 0));
     transition:transform var(--m-slide) var(--ease);
   }
-  .rail ol{list-style:none; margin:0; padding:0; display:grid; gap:2px}
+  .rail ol{list-style:none; margin:0; padding:0; display:grid; gap:0}
   .rail a{
-    display:grid; grid-template-columns:24px 1fr auto; align-items:center; gap:var(--s-3);
-    min-height:44px; padding:var(--s-2) var(--s-3); border-radius:var(--r-md);
+    display:grid; grid-template-columns:20px minmax(0,1fr) auto; align-items:center; gap:var(--s-3);
+    min-height:34px; padding:var(--s-1) var(--s-3); border-radius:var(--r-md);
     text-decoration:none; color:var(--muted); font-size:var(--t-small); line-height:1.3;
     border:1px solid transparent;
     transition:background-color var(--m-out) var(--ease), color var(--m-out) var(--ease);
   }
+  .rail a .t{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .rail a:hover{background:var(--surface); color:var(--ink); transition-duration:var(--m-in)}
   .rail a.active{background:var(--card); color:var(--ink); border-color:var(--line)}
   .rail .n{
-    width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
-    font-size:var(--t-label); font-weight:500; border:1px solid var(--line-strong); color:var(--muted);
+    width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+    font-size:var(--t-label); font-weight:500; line-height:1; border:1px solid var(--line-strong); color:var(--muted);
     transition:background-color var(--m-in) var(--ease), border-color var(--m-in) var(--ease), color var(--m-in) var(--ease);
   }
   .rail a.active .n{border-color:var(--action); color:var(--ink)}
   .rail a.done .n{background:var(--ok); border-color:var(--ok); color:var(--card)}
   .rail .c{font-size:var(--t-label)}
-  .rail .n svg{width:14px; height:14px}
+  .rail a.done .c{color:var(--ok)}
+  /* strumenti: gruppo separato, la voce resta sempre visibile come una scheda */
   .rail-sep{
-    margin:var(--s-4) var(--s-3) var(--s-1); padding-top:var(--s-3); border-top:1px solid var(--line);
+    margin:var(--s-4) var(--s-3) var(--s-2); padding-top:var(--s-3); border-top:1px solid var(--line);
     font-size:var(--t-label); font-weight:500; color:var(--muted);
   }
-  .rail a.done .c{color:var(--ok)}
+  .rail a.tool{min-height:44px; background:var(--card); border-color:var(--line); color:var(--ink)}
+  .rail a.tool:hover{border-color:var(--line-strong)}
+  .rail a.tool .n{border:0; border-radius:0; color:var(--ink)}
+  .rail a.tool .n svg{width:18px; height:18px}
+  .rail a.tool.active{border-color:var(--action)}
   .rail-reset{
-    margin:var(--s-3) 0 0 var(--s-3); padding:var(--s-2) 0; background:none; border:0; cursor:pointer;
-    font-size:var(--t-small); color:var(--muted);
-    text-decoration:underline; text-underline-offset:4px; text-decoration-color:var(--line-strong);
+    flex:none; padding:0; background:none; border:0; cursor:pointer;
+    font-size:var(--t-label); color:var(--muted);
+    text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line-strong);
     transition:color var(--m-out) var(--ease), text-decoration-color var(--m-out) var(--ease);
   }
   .rail-reset:hover{color:var(--ink); text-decoration-color:currentColor; transition-duration:var(--m-in)}
@@ -397,12 +407,15 @@
     .rail,main{min-width:0}
     .rail{position:sticky; top:var(--hdr, 120px); z-index:20; margin:0 calc(-1 * var(--gut)); padding:var(--s-3) var(--gut);
       background:var(--bg); border-bottom:1px solid var(--line)}
-    .rail-head,.rail-total,.rail-reset{display:none}
+    .rail{max-height:none; overflow:visible}
+    .rail-top,.rail-total{display:none}
     .rail ol{display:flex; gap:var(--s-2); overflow-x:auto; scrollbar-width:none}
     .rail ol::-webkit-scrollbar{display:none}
     .rail a{grid-template-columns:auto auto; padding:0 var(--s-3) 0 var(--s-2); border-radius:var(--r-btn);
       background:var(--card); border-color:var(--line); white-space:nowrap}
     .rail a .c{display:none}
+    .rail a .t{overflow:visible}
+    .rail a.tool{min-height:0}
     .rail-sep{flex:none; width:1px; margin:var(--s-1) var(--s-1); padding:0; border:0; background:var(--line); font-size:0}
     footer .inner{margin-left:0}
   }
@@ -477,10 +490,12 @@
 
 <div class="shell">
   <nav class="rail" id="nav" aria-label="Sezioni della maschera">
-    <p class="rail-head" id="railHead">Campi copiati</p>
+    <div class="rail-top">
+      <p class="rail-head" id="railHead">Campi copiati</p>
+      <button class="rail-reset" id="btnReset" type="button">Azzera spunte</button>
+    </div>
     <div class="rail-total" aria-hidden="true"><i id="railBar"></i></div>
     <ol id="railList"></ol>
-    <button class="rail-reset" id="btnReset" type="button">Azzera spunte</button>
   </nav>
 
   <main>
@@ -1078,6 +1093,7 @@ const SEZIONI = [
   {
     id: "azienda",
     titolo: "Dati azienda",
+    breve: "Azienda",
     campi: [
       { k: "tipoRagioneSociale", label: "Tipo ragione sociale", nota: "menu a tendina" },
       { k: "ragioneSociale",     label: "Ragione sociale" },
@@ -1090,6 +1106,7 @@ const SEZIONI = [
   {
     id: "rappresentante",
     titolo: "Dati rappresentante legale",
+    breve: "Rappresentante legale",
     campi: [
       { k: "genere",                 label: "Genere", nota: "menu a tendina" },
       { k: "nomeRappresentante",     label: "Nome rappresentante" },
@@ -1105,6 +1122,7 @@ const SEZIONI = [
   {
     id: "fatturazione",
     titolo: "Dati di fatturazione",
+    breve: "Fatturazione",
     campi: [
       { k: "tipoMandato",      label: "Tipo Mandato", nota: "menu a tendina" },
       { k: "aliquotaIrpef",    label: "Aliquota IRPEF", nota: "menu a tendina" },
@@ -1116,6 +1134,7 @@ const SEZIONI = [
   {
     id: "agente",
     titolo: "Agente di riferimento",
+    breve: "Agente",
     campi: [
       { k: "nomeAgente",    label: "Nome" },
       { k: "cognomeAgente", label: "Cognome" }
@@ -1124,6 +1143,7 @@ const SEZIONI = [
   {
     id: "pagamento",
     titolo: "Informazioni di pagamento",
+    breve: "Pagamento",
     campi: [
       { k: "titolareConto", label: "Titolare conto" },
       { k: "nomeBanca",     label: "Nome banca" },
@@ -1134,6 +1154,7 @@ const SEZIONI = [
   {
     id: "compensazione",
     titolo: "Compensazione compensi e fatture in scadenza",
+    breve: "Compensazione",
     campi: [
       { k: "compensazione", label: "Compensazione", nota: "opzione Sì / No" }
     ]
@@ -1141,6 +1162,7 @@ const SEZIONI = [
   {
     id: "indirizzo",
     titolo: "Indirizzo di fatturazione",
+    breve: "Indirizzo",
     campi: [
       { k: "provincia",  label: "Provincia" },
       { k: "citta",      label: "Città" },
@@ -1332,7 +1354,8 @@ function creaRail(){
     const a = el("a");
     a.href = "#sez-" + sez.id;
     a.dataset.sez = sez.id;
-    a.append(el("span", "n", String(i + 1)), el("span", "t", sez.titolo), el("span", "c"));
+    a.title = sez.titolo;
+    a.append(el("span", "n", String(i + 1)), el("span", "t", sez.breve || sez.titolo), el("span", "c"));
     li.appendChild(a);
     list.appendChild(li);
   });
@@ -1349,7 +1372,7 @@ function creaRail(){
   sep.setAttribute("role", "presentation");
   list.appendChild(sep);
   const liQr = el("li");
-  const aQr = el("a");
+  const aQr = el("a", "tool");
   aQr.href = "#sez-qr";
   aQr.dataset.sez = "qr";
   const icoQr = el("span", "n");
@@ -1378,7 +1401,7 @@ function aggiornaAvanzamento(){
     }
   });
   document.getElementById("railBar").style.setProperty("--p", totali ? fatti / totali : 0);
-  document.getElementById("railHead").textContent = "Campi copiati: " + fatti + " di " + totali;
+  document.getElementById("railHead").textContent = "Copiati " + fatti + " di " + totali;
 }
 
 let osservatore = null;
